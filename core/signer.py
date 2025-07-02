@@ -20,7 +20,8 @@ def build_signed_tx(w3, to_address, value_wei, gas=21000, gas_price_wei=None):
     }
 
     signed = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
-    return signed.rawTransaction.hex()  # ✅ return the hex string
+    raw_hex = Web3.to_hex(signed.rawTransaction)  # ✅ ensure it's a hex string
+    return raw_hex
 
 def get_address():
     return ACCOUNT.address

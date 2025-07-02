@@ -8,12 +8,13 @@ async def simulate_sandwich_bundle(victim_tx, w3):
     print(f"💻 Handling tx: {victim_tx['hash'].hex()}")
 
     try:
-        # Skip simulation — we're live now
-        eth_to_send = w3.to_wei(0.0001, "ether")  # Live ETH size
+        eth_to_send = w3.to_wei(0.0001, "ether")
+
+        # These return raw hex strings
         front_tx = build_signed_tx(w3, get_address(), eth_to_send)
         back_tx = build_signed_tx(w3, get_address(), eth_to_send)
 
-        # These are already hex strings — DO NOT access rawTransaction
+        # Correct usage — bundle of signed hex strings
         bundle = [front_tx, back_tx]
         block_number = w3.eth.block_number + 1
 
