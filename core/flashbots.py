@@ -1,11 +1,12 @@
 import requests
 import json
+from core.flashbots_auth import sign_flashbots_payload
 
 FLASHBOTS_URL = "https://relay.flashbots.net"
 
 def send_flashbots_bundle(bundle, block_number, w3):
     try:
-        payload = {
+        payload_obj = {
             "jsonrpc": "2.0",
             "id": 1,
             "method": "eth_sendBundle",
@@ -18,8 +19,13 @@ def send_flashbots_bundle(bundle, block_number, w3):
             }]
         }
 
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(FLASHBOTS_URL, data=json.dumps(payload), headers=headers)
+        payload = json.dumps(payload_obj)
+        headers = {
+            "Content-Type": "application/json",
+            "X-Flashbots-Signature": sign_flashbots_payload(payload)
+        }
+
+        response = requests.post(FLASHBOTS_URL, data=payload, headers=headers)
 
         if response.status_code == 200:
             return {"success": True, "response": response.json()}
