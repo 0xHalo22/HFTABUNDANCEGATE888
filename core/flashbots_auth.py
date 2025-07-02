@@ -30,8 +30,8 @@ def sign_flashbots_payload(payload_dict: dict) -> tuple[str, str]:
     # Step 2: keccak256 hash of UTF-8 encoded JSON string  
     digest = Web3.keccak(canonical_json.encode("utf-8"))
     
-    # Step 3: Use EIP-191 signing with hexstr parameter (critical fix!)
-    message = encode_defunct(hexstr=digest.hex())
+    # Step 3: Use EIP-191 signing with digest directly (critical fix!)
+    message = encode_defunct(digest)
     signed = SEARCHER_ACCOUNT.sign_message(message)
     signature_hex = signed.signature.hex()
     
