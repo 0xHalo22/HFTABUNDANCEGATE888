@@ -33,14 +33,12 @@ def sign_flashbots_payload(payload: str) -> str:
 
     # TRY APPROACH 1: Direct signing of keccak256 hash (no EIP-191)
     try:
-        # Sign the raw digest directly using the private key
-        from eth_account._utils.signing import sign_message_hash
-        signature_tuple = sign_message_hash(SEARCHER_ACCOUNT._key_obj, digest)
+        # Method 1: Use _key_obj directly to sign the digest
+        private_key_bytes = SEARCHER_ACCOUNT._key_obj
+        signature = private_key_bytes.sign_msg_hash(digest)
         
-        # Convert tuple (v, r, s) to 65-byte signature format
-        v, r, s = signature_tuple
-        signature_bytes = r.to_bytes(32, 'big') + s.to_bytes(32, 'big') + v.to_bytes(1, 'big')
-        signature_hex = '0x' + signature_bytes.hex()
+        # Convert signature to hex format
+        signature_hex = signature.to_hex()
         
         print("✍️ Direct Signature (65-byte):", signature_hex)
         print("🔐 Signer Address:", SEARCHER_ACCOUNT.address)
