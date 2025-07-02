@@ -1,16 +1,15 @@
-from eth_account import Account
-from web3 import Web3
-import os
 
-SEARCHER_KEY = os.getenv("PRIVATE_KEY_SEARCHER")
-SEARCHER_ACCOUNT = Account.from_key(SEARCHER_KEY)
+import os
+import json
+from eth_account import Account
+from eth_account.messages import encode_defunct
+
+PRIVATE_KEY_SEARCHER = os.getenv("PRIVATE_KEY_SEARCHER")
+SEARCHER_ACCOUNT = Account.from_key(PRIVATE_KEY_SEARCHER)
 
 def sign_flashbots_payload(payload: str):
-    # Compute keccak256 of the payload
-    hashed = Web3.keccak(text=payload)
-
-    # Sign the raw hash directly using the account instance
-    signed = SEARCHER_ACCOUNT.signHash(hashed)
-
-    # Return the Flashbots-required header format
-    return f"{SEARCHER_ACCOUNT.address}:{signed.signature.hex()}"
+    # This signs the canonical JSON string Flashbots expects
+    message = encode_defunct(text=payload)
+    signed = SEARCHER_ACCOUNT.sign_message(message)
+    signature = signed.signature.hex()
+    return f"{SEARCHER_ACCOUNT.address}:{signature}"
