@@ -2,14 +2,13 @@
 import os
 import json
 from eth_account import Account
-from eth_account.messages import encode_defunct
+from eth_utils import keccak
 
 PRIVATE_KEY_SEARCHER = os.getenv("PRIVATE_KEY_SEARCHER")
 SEARCHER_ACCOUNT = Account.from_key(PRIVATE_KEY_SEARCHER)
 
-def sign_flashbots_payload(payload: str):
-    # This signs the canonical JSON string Flashbots expects
-    message = encode_defunct(text=payload)
-    signed = SEARCHER_ACCOUNT.sign_message(message)
-    signature = signed.signature.hex()
-    return f"{SEARCHER_ACCOUNT.address}:{signature}"
+def sign_flashbots_payload(payload: str) -> str:
+    # Canonical Flashbots expects raw keccak hash signature
+    payload_hash = keccak(text=payload)  # 👈 no prefixing
+    signed = SEARCHER_ACCOUNT.signHash(payload_hash)
+    return f"{SEARCHER_ACCOUNT.address}:{signed.signature.hex()}"
