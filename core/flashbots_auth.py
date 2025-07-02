@@ -1,3 +1,4 @@
+
 import os
 import json
 from eth_account import Account
@@ -16,7 +17,7 @@ def sign_flashbots_payload(payload: str) -> str:
     """
     Signs the canonical JSON payload for Flashbots using EIP-191,
     with detailed logging for debugging purposes.
-
+    
     Args:
         payload (str): Canonical JSON string (e.g., json.dumps(..., separators=(",", ":"), sort_keys=True))
 
@@ -24,7 +25,7 @@ def sign_flashbots_payload(payload: str) -> str:
         str: X-Flashbots-Signature header value in format "0xAddress:0xSignature"
     """
     print("🔄 [SIGNATURE] Starting Flashbots signature process...")
-
+    
     # Step 1: keccak256 hash of UTF-8 encoded JSON string
     digest = Web3.keccak(payload.encode("utf-8"))
     print("🧾 Canonical JSON Payload:\n", payload)
