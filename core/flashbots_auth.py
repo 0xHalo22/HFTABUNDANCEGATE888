@@ -10,8 +10,9 @@ def sign_flashbots_payload(payload: str) -> str:
     # Create the raw keccak hash that Flashbots expects
     payload_hash = keccak(text=payload)
     
-    # Sign the hash directly using the private key
-    signed = SEARCHER_ACCOUNT._key_obj.sign_msg_hash(payload_hash)
+    # Sign the hash directly without Ethereum message prefix
+    # This is the raw ECDSA signature that Flashbots expects
+    signed = SEARCHER_ACCOUNT._key_obj.sign_digest_deterministic(payload_hash)
     
     # Convert to hex signature
     signature = signed.to_hex()
