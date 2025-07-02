@@ -1,3 +1,4 @@
+
 import requests
 import json
 from core.flashbots_auth import sign_flashbots_payload
@@ -6,7 +7,7 @@ FLASHBOTS_URL = "https://relay.flashbots.net"
 
 def send_flashbots_bundle(bundle, block_number, w3):
     try:
-        # Check if block number is still valid (like the example bot)
+        # Check if block number is still valid
         current_block = w3.eth.block_number
         if block_number <= current_block:
             print(f"⚠️ Block {block_number} already passed (current: {current_block})")
@@ -17,7 +18,7 @@ def send_flashbots_bundle(bundle, block_number, w3):
         import time
         current_time = int(time.time())
         
-        payload_obj = {
+        payload_dict = {
             "jsonrpc": "2.0", 
             "id": 1,
             "method": "eth_sendBundle",
@@ -25,26 +26,26 @@ def send_flashbots_bundle(bundle, block_number, w3):
                 "txs": bundle,
                 "blockNumber": hex(block_number),
                 "minTimestamp": current_time,
-                "maxTimestamp": current_time + 60,  # 1 minute window
+                "maxTimestamp": current_time + 60,
                 "revertingTxHashes": []
             }]
         }
 
-        # Canonicalize payload
-        canonical_payload = json.dumps(payload_obj, separators=(",", ":"), sort_keys=True)
-        
         print(f"📦 Bundle for block {block_number} (current: {current_block})")
         print(f"⏰ Timestamp window: {current_time} - {current_time + 60}")
         
-        signature = sign_flashbots_payload(canonical_payload)
+        # Use the fixed signature function
+        header_value, canonical_json = sign_flashbots_payload(payload_dict)
 
         headers = {
             "Content-Type": "application/json",
-            "X-Flashbots-Signature": signature
+            "X-Flashbots-Signature": header_value
         }
 
         print("🚀 Submitting bundle to Flashbots...")
-        response = requests.post(FLASHBOTS_URL, data=canonical_payload, headers=headers, timeout=10)
+        
+        # Critical: Use data= not json= to prevent reserialization
+        response = requests.post(FLASHBOTS_URL, data=canonical_json, headers=headers, timeout=10)
 
         print(f"📡 Response status: {response.status_code}")
         

@@ -2,7 +2,6 @@
 import os
 import json
 from eth_account import Account
-from eth_account.signers.local import LocalAccount
 from eth_account.messages import encode_defunct
 from web3 import Web3
 
@@ -11,35 +10,38 @@ PRIVATE_KEY_SEARCHER = os.getenv("PRIVATE_KEY_SEARCHER")
 assert PRIVATE_KEY_SEARCHER, "Missing PRIVATE_KEY_SEARCHER in env"
 
 # Create signer account
-SEARCHER_ACCOUNT: LocalAccount = Account.from_key(PRIVATE_KEY_SEARCHER)
+SEARCHER_ACCOUNT = Account.from_key(PRIVATE_KEY_SEARCHER)
 
-def sign_flashbots_payload(payload: str) -> str:
+def sign_flashbots_payload(payload_dict: dict) -> tuple[str, str]:
     """
-    Signs the canonical JSON payload for Flashbots using the standard method.
-    Based on Flashbots example bot implementation.
+    Signs the payload dict for Flashbots using the verified method.
     
     Args:
-        payload (str): Canonical JSON string
+        payload_dict (dict): The payload dictionary to sign
 
     Returns:
-        str: X-Flashbots-Signature header value in format "0xAddress:0xSignature"
+        tuple: (header_value, canonical_json) for use in requests
     """
     print("🔄 [SIGNATURE] Starting Flashbots signature process...")
     
-    # Step 1: keccak256 hash of UTF-8 encoded JSON string  
-    digest = Web3.keccak(payload.encode("utf-8"))
-    print("🔑 Payload hash:", digest.hex())
+    # Step 1: Canonicalize JSON payload
+    canonical_json = json.dumps(payload_dict, separators=(",", ":"), sort_keys=True)
     
-    # Step 2: Use standard EIP-191 signing (like the example bot)
+    # Step 2: keccak256 hash of UTF-8 encoded JSON string  
+    digest = Web3.keccak(canonical_json.encode("utf-8"))
+    
+    # Step 3: Use EIP-191 signing with hexstr parameter (critical fix!)
     message = encode_defunct(hexstr=digest.hex())
     signed = SEARCHER_ACCOUNT.sign_message(message)
     signature_hex = signed.signature.hex()
     
-    print("✍️ Signature:", signature_hex)
-    print("🔐 Signer Address:", SEARCHER_ACCOUNT.address)
-    
-    # Step 3: Construct header
+    # Step 4: Construct header
     header_value = f"{SEARCHER_ACCOUNT.address}:{signature_hex}"
-    print("✅ X-Flashbots-Signature:", header_value)
     
-    return header_value
+    print("🧾 Canonical JSON:", canonical_json)
+    print("🔑 Digest:", digest.hex())
+    print("📦 EIP-191 Message:", message)
+    print("✍️ Signature:", signature_hex)
+    print("🔐 Header:", header_value)
+    
+    return header_value, canonical_json
