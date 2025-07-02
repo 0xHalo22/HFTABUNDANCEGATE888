@@ -1,0 +1,171 @@
+🚨 Starting ETH-only HFT sniper live...
+🚨 Starting ETH-only HFT sniper live...
+🔌 Connecting to WebSocket provider...
+🔍 Listening for new pending transactions...
+🔎 Scanning tx: 252e3258d2b0ae7152e119e355da97f173018bc58fdde373c18430ee65c2d46a
+🔍 [TX FILTER - LIVE] Allowing tx: 252e3258d2b0ae7152e119e355da97f173018bc58fdde373c18430ee65c2d46a -> to: 0x974CaA59e49682CdA0AD2bbe82983419A2ECC400
+✅ Valid tx detected — sending to execution
+
+💻 Handling tx: 252e3258d2b0ae7152e119e355da97f173018bc58fdde373c18430ee65c2d46a
+💰 Wallet balance: 0.002 ETH
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901508084 <class 'str'>
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901500284 <class 'str'>
+✅ TX FORMAT CHECK
+↪ front_tx: 0xf901508084 <class 'str'>
+↪ back_tx : 0xf901500284 <class 'str'>
+🧬 TXs identical? False
+↪ victim_tx hash: 252e3258d2b0ae7152e119e355da97f173018bc58fdde373c18430ee65c2d46a
+🧪 Flashbots bundle → block 22833667:
+  🔗 tx[0]: 0xf90150808443b199458303 ...
+  🔗 tx[1]: 252e3258d2b0ae7152e119e3 ...
+  🔗 tx[2]: 0xf90150028443b199458303 ...
+📦 Canonical payload string:
+'{"jsonrpc":"2.0","id":1,"method":"eth_sendBundle","params":[{"txs":["0xf90150808443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f26a003976fd422c1713e3cccd96d96a6b9cfca19e5cd1df110f1fb36966b760c3372a0070ed05b04f6f53deb6e684758d3477240983943ced21c483648388ff84349c2","252e3258d2b0ae7152e119e355da97f173018bc58fdde373c18430ee65c2d46a","0xf90150028443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f25a00ccdca9f0165d5a01d36b6cd6a0174592eab7d8a619f2f3e9083e2a3cfbc0e7ea002d855794e23a78b961229a87cfdae9a409847d71b1d8d762dce27cd553be2a3"],"blockNumber":"0x15c6a03","minTimestamp":0,"maxTimestamp":9999999999,"revertingTxHashes":[]}]}'
+❌ Bundle submission failed:
+{'success': False, 'error': "'LocalAccount' object has no attribute 'sign_hash'"}
+🔎 Scanning tx: 685738d45bd4f7c4186830e93a47e35de0c44434fdf02e99305c12de715487af
+🔍 [TX FILTER - LIVE] Allowing tx: 685738d45bd4f7c4186830e93a47e35de0c44434fdf02e99305c12de715487af -> to: 0x974CaA59e49682CdA0AD2bbe82983419A2ECC400
+✅ Valid tx detected — sending to execution
+
+💻 Handling tx: 685738d45bd4f7c4186830e93a47e35de0c44434fdf02e99305c12de715487af
+💰 Wallet balance: 0.002 ETH
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901508084 <class 'str'>
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901500284 <class 'str'>
+✅ TX FORMAT CHECK
+↪ front_tx: 0xf901508084 <class 'str'>
+↪ back_tx : 0xf901500284 <class 'str'>
+🧬 TXs identical? False
+↪ victim_tx hash: 685738d45bd4f7c4186830e93a47e35de0c44434fdf02e99305c12de715487af
+🧪 Flashbots bundle → block 22833667:
+  🔗 tx[0]: 0xf90150808443b199458303 ...
+  🔗 tx[1]: 685738d45bd4f7c4186830e9 ...
+  🔗 tx[2]: 0xf90150028443b199458303 ...
+📦 Canonical payload string:
+'{"jsonrpc":"2.0","id":1,"method":"eth_sendBundle","params":[{"txs":["0xf90150808443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f26a003976fd422c1713e3cccd96d96a6b9cfca19e5cd1df110f1fb36966b760c3372a0070ed05b04f6f53deb6e684758d3477240983943ced21c483648388ff84349c2","685738d45bd4f7c4186830e93a47e35de0c44434fdf02e99305c12de715487af","0xf90150028443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f25a00ccdca9f0165d5a01d36b6cd6a0174592eab7d8a619f2f3e9083e2a3cfbc0e7ea002d855794e23a78b961229a87cfdae9a409847d71b1d8d762dce27cd553be2a3"],"blockNumber":"0x15c6a03","minTimestamp":0,"maxTimestamp":9999999999,"revertingTxHashes":[]}]}'
+❌ Bundle submission failed:
+{'success': False, 'error': "'LocalAccount' object has no attribute 'sign_hash'"}
+🔎 Scanning tx: 6c0321326152ec81fdc099ab661c131f872fb5d1fc8da8f0ef14cce9a967b895
+🔍 [TX FILTER - LIVE] Allowing tx: 6c0321326152ec81fdc099ab661c131f872fb5d1fc8da8f0ef14cce9a967b895 -> to: 0x974CaA59e49682CdA0AD2bbe82983419A2ECC400
+✅ Valid tx detected — sending to execution
+
+💻 Handling tx: 6c0321326152ec81fdc099ab661c131f872fb5d1fc8da8f0ef14cce9a967b895
+💰 Wallet balance: 0.002 ETH
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901508084 <class 'str'>
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901500284 <class 'str'>
+✅ TX FORMAT CHECK
+↪ front_tx: 0xf901508084 <class 'str'>
+↪ back_tx : 0xf901500284 <class 'str'>
+🧬 TXs identical? False
+↪ victim_tx hash: 6c0321326152ec81fdc099ab661c131f872fb5d1fc8da8f0ef14cce9a967b895
+🧪 Flashbots bundle → block 22833667:
+  🔗 tx[0]: 0xf90150808443b199458303 ...
+  🔗 tx[1]: 6c0321326152ec81fdc099ab ...
+  🔗 tx[2]: 0xf90150028443b199458303 ...
+📦 Canonical payload string:
+'{"jsonrpc":"2.0","id":1,"method":"eth_sendBundle","params":[{"txs":["0xf90150808443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f26a003976fd422c1713e3cccd96d96a6b9cfca19e5cd1df110f1fb36966b760c3372a0070ed05b04f6f53deb6e684758d3477240983943ced21c483648388ff84349c2","6c0321326152ec81fdc099ab661c131f872fb5d1fc8da8f0ef14cce9a967b895","0xf90150028443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f25a00ccdca9f0165d5a01d36b6cd6a0174592eab7d8a619f2f3e9083e2a3cfbc0e7ea002d855794e23a78b961229a87cfdae9a409847d71b1d8d762dce27cd553be2a3"],"blockNumber":"0x15c6a03","minTimestamp":0,"maxTimestamp":9999999999,"revertingTxHashes":[]}]}'
+❌ Bundle submission failed:
+{'success': False, 'error': "'LocalAccount' object has no attribute 'sign_hash'"}
+🔎 Scanning tx: f11861634063a2a0f020e9bc70e982fc2d32816579007f423b4f037f036dfc34
+🔍 [TX FILTER - LIVE] Allowing tx: f11861634063a2a0f020e9bc70e982fc2d32816579007f423b4f037f036dfc34 -> to: 0x974CaA59e49682CdA0AD2bbe82983419A2ECC400
+✅ Valid tx detected — sending to execution
+
+💻 Handling tx: f11861634063a2a0f020e9bc70e982fc2d32816579007f423b4f037f036dfc34
+💰 Wallet balance: 0.002 ETH
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901508084 <class 'str'>
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901500284 <class 'str'>
+✅ TX FORMAT CHECK
+↪ front_tx: 0xf901508084 <class 'str'>
+↪ back_tx : 0xf901500284 <class 'str'>
+🧬 TXs identical? False
+↪ victim_tx hash: f11861634063a2a0f020e9bc70e982fc2d32816579007f423b4f037f036dfc34
+🧪 Flashbots bundle → block 22833667:
+  🔗 tx[0]: 0xf90150808443b199458303 ...
+  🔗 tx[1]: f11861634063a2a0f020e9bc ...
+  🔗 tx[2]: 0xf90150028443b199458303 ...
+📦 Canonical payload string:
+'{"jsonrpc":"2.0","id":1,"method":"eth_sendBundle","params":[{"txs":["0xf90150808443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f26a003976fd422c1713e3cccd96d96a6b9cfca19e5cd1df110f1fb36966b760c3372a0070ed05b04f6f53deb6e684758d3477240983943ced21c483648388ff84349c2","f11861634063a2a0f020e9bc70e982fc2d32816579007f423b4f037f036dfc34","0xf90150028443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f25a00ccdca9f0165d5a01d36b6cd6a0174592eab7d8a619f2f3e9083e2a3cfbc0e7ea002d855794e23a78b961229a87cfdae9a409847d71b1d8d762dce27cd553be2a3"],"blockNumber":"0x15c6a03","minTimestamp":0,"maxTimestamp":9999999999,"revertingTxHashes":[]}]}'
+❌ Bundle submission failed:
+{'success': False, 'error': "'LocalAccount' object has no attribute 'sign_hash'"}
+🔎 Scanning tx: 274d788ced6159c954ecdd469fa1ef7af1539522f52da778118ac8ba17e0d92e
+🔍 [TX FILTER - LIVE] Allowing tx: 274d788ced6159c954ecdd469fa1ef7af1539522f52da778118ac8ba17e0d92e -> to: 0x974CaA59e49682CdA0AD2bbe82983419A2ECC400
+✅ Valid tx detected — sending to execution
+
+💻 Handling tx: 274d788ced6159c954ecdd469fa1ef7af1539522f52da778118ac8ba17e0d92e
+💰 Wallet balance: 0.002 ETH
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901508084 <class 'str'>
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901500284 <class 'str'>
+✅ TX FORMAT CHECK
+↪ front_tx: 0xf901508084 <class 'str'>
+↪ back_tx : 0xf901500284 <class 'str'>
+🧬 TXs identical? False
+↪ victim_tx hash: 274d788ced6159c954ecdd469fa1ef7af1539522f52da778118ac8ba17e0d92e
+🧪 Flashbots bundle → block 22833667:
+  🔗 tx[0]: 0xf90150808443b199458303 ...
+  🔗 tx[1]: 274d788ced6159c954ecdd46 ...
+  🔗 tx[2]: 0xf90150028443b199458303 ...
+📦 Canonical payload string:
+'{"jsonrpc":"2.0","id":1,"method":"eth_sendBundle","params":[{"txs":["0xf90150808443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f26a003976fd422c1713e3cccd96d96a6b9cfca19e5cd1df110f1fb36966b760c3372a0070ed05b04f6f53deb6e684758d3477240983943ced21c483648388ff84349c2","274d788ced6159c954ecdd469fa1ef7af1539522f52da778118ac8ba17e0d92e","0xf90150028443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f25a00ccdca9f0165d5a01d36b6cd6a0174592eab7d8a619f2f3e9083e2a3cfbc0e7ea002d855794e23a78b961229a87cfdae9a409847d71b1d8d762dce27cd553be2a3"],"blockNumber":"0x15c6a03","minTimestamp":0,"maxTimestamp":9999999999,"revertingTxHashes":[]}]}'
+❌ Bundle submission failed:
+{'success': False, 'error': "'LocalAccount' object has no attribute 'sign_hash'"}
+🔎 Scanning tx: a3f1046ca2d3369a7d1bbf21759c87e658396bce3bf65364efbb4012ec51d52c
+🔍 [TX FILTER - LIVE] Allowing tx: a3f1046ca2d3369a7d1bbf21759c87e658396bce3bf65364efbb4012ec51d52c -> to: 0x4E5B2e1dc63F6b91cb6Cd759936495434C7e972F
+✅ Valid tx detected — sending to execution
+
+💻 Handling tx: a3f1046ca2d3369a7d1bbf21759c87e658396bce3bf65364efbb4012ec51d52c
+💰 Wallet balance: 0.002 ETH
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901508084 <class 'str'>
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901500284 <class 'str'>
+✅ TX FORMAT CHECK
+↪ front_tx: 0xf901508084 <class 'str'>
+↪ back_tx : 0xf901500284 <class 'str'>
+🧬 TXs identical? False
+↪ victim_tx hash: a3f1046ca2d3369a7d1bbf21759c87e658396bce3bf65364efbb4012ec51d52c
+🧪 Flashbots bundle → block 22833667:
+  🔗 tx[0]: 0xf90150808443b199458303 ...
+  🔗 tx[1]: a3f1046ca2d3369a7d1bbf21 ...
+  🔗 tx[2]: 0xf90150028443b199458303 ...
+📦 Canonical payload string:
+'{"jsonrpc":"2.0","id":1,"method":"eth_sendBundle","params":[{"txs":["0xf90150808443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f26a003976fd422c1713e3cccd96d96a6b9cfca19e5cd1df110f1fb36966b760c3372a0070ed05b04f6f53deb6e684758d3477240983943ced21c483648388ff84349c2","a3f1046ca2d3369a7d1bbf21759c87e658396bce3bf65364efbb4012ec51d52c","0xf90150028443b199458303d09094f164fc0ec4e93095b804a4795bbe1e041497b92a87038d7ea4c68000b8e47ff36ab500000000000000000000000000000000000000000000000023525b3cad0e70000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000bb9c0b4764667535efa47d50ff78bc8c55aea7b80000000000000000000000000000000000000000000000000000000068658ac70000000000000000000000000000000000000000000000000000000000000002000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc20000000000000000000000006b175474e89094c44da98b954eedeac495271d0f25a00ccdca9f0165d5a01d36b6cd6a0174592eab7d8a619f2f3e9083e2a3cfbc0e7ea002d855794e23a78b961229a87cfdae9a409847d71b1d8d762dce27cd553be2a3"],"blockNumber":"0x15c6a03","minTimestamp":0,"maxTimestamp":9999999999,"revertingTxHashes":[]}]}'
+❌ Bundle submission failed:
+{'success': False, 'error': "'LocalAccount' object has no attribute 'sign_hash'"}
+🔎 Scanning tx: 0ef3040905071e6a64df7cee77388a2c4f18713593788ba5676303826ce316d3
+🔍 [TX FILTER - LIVE] Allowing tx: 0ef3040905071e6a64df7cee77388a2c4f18713593788ba5676303826ce316d3 -> to: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+✅ Valid tx detected — sending to execution
+
+💻 Handling tx: 0ef3040905071e6a64df7cee77388a2c4f18713593788ba5676303826ce316d3
+💰 Wallet balance: 0.002 ETH
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901508084 <class 'str'>
+🚧 signed_tx type: <class 'eth_account.datastructures.SignedTransaction'>
+🚧 signed_tx dir: ['__add__', '__annotations__', '__class__', '__class_getitem__', '__contains__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__match_args__', '__module__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmul__', '__setattr__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', '_asdict', '_field_defaults', '_fields', '_make', '_replace', 'count', 'hash', 'index', 'r', 'raw_transaction', 's', 'v']
+✅ [SWAP BUILDER] Returning hex: 0xf901500284 <class 'str'>
+✅ TX FORMAT CHECK
+↪ front_tx: 0xf901508084 <class 'str'>
+↪ back_tx : 0xf901500284 <class 'str'>
+🧬 TXs identical? False
+↪ victim_tx hash: 0ef3040905071e6a64df7cee77388a2c4f18713593788ba5676303826ce316d3
