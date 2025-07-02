@@ -15,8 +15,8 @@ SEARCHER_ACCOUNT: LocalAccount = Account.from_key(PRIVATE_KEY_SEARCHER)
 
 def sign_flashbots_payload(payload: str) -> str:
     """
-    Signs the canonical JSON payload for Flashbots using EIP-191,
-    with detailed logging for debugging purposes.
+    Signs the canonical JSON payload for Flashbots.
+    Based on Flashbots docs, trying direct keccak256 signing.
     
     Args:
         payload (str): Canonical JSON string (e.g., json.dumps(..., separators=(",", ":"), sort_keys=True))
@@ -31,19 +31,37 @@ def sign_flashbots_payload(payload: str) -> str:
     print("🧾 Canonical JSON Payload:\n", payload)
     print("🔑 Keccak256 Digest:", digest.hex())
 
-    # Step 2: Ethereum-standard EIP-191 message prefix
-    message = encode_defunct(hexstr=digest.hex())
-    print("📦 EIP-191 Encoded Message:\n", message)
+    # TRY APPROACH 1: Direct signing of keccak256 hash (no EIP-191)
+    try:
+        # Sign the raw digest directly using the private key
+        from eth_account._utils.signing import sign_message_hash
+        signature = sign_message_hash(SEARCHER_ACCOUNT._key_obj, digest)
+        signature_hex = signature.to_hex()
+        
+        print("✍️ Direct Signature (65-byte):", signature_hex)
+        print("🔐 Signer Address:", SEARCHER_ACCOUNT.address)
 
-    # Step 3: Sign the encoded message
-    signed = SEARCHER_ACCOUNT.sign_message(message)
-    signature_hex = signed.signature.hex()
+        # Step 4: Construct X-Flashbots-Signature header
+        header_value = f"{SEARCHER_ACCOUNT.address}:{signature_hex}"
+        print("✅ Final Header (X-Flashbots-Signature):", header_value)
 
-    print("✍️ Signature (65-byte):", signature_hex)
-    print("🔐 Signer Address:", SEARCHER_ACCOUNT.address)
+        return header_value
+        
+    except Exception as e:
+        print(f"❌ Direct signing failed: {e}")
+        
+        # FALLBACK: EIP-191 method (our current approach)
+        print("🔄 Falling back to EIP-191 method...")
+        message = encode_defunct(hexstr=digest.hex())
+        print("📦 EIP-191 Encoded Message:\n", message)
 
-    # Step 4: Construct X-Flashbots-Signature header
-    header_value = f"{SEARCHER_ACCOUNT.address}:{signature_hex}"
-    print("✅ Final Header (X-Flashbots-Signature):", header_value)
+        signed = SEARCHER_ACCOUNT.sign_message(message)
+        signature_hex = signed.signature.hex()
 
-    return header_value
+        print("✍️ EIP-191 Signature (65-byte):", signature_hex)
+        print("🔐 Signer Address:", SEARCHER_ACCOUNT.address)
+
+        header_value = f"{SEARCHER_ACCOUNT.address}:{signature_hex}"
+        print("✅ Final Header (X-Flashbots-Signature):", header_value)
+
+        return header_value
