@@ -9,10 +9,8 @@ def sign_flashbots_payload(payload: str):
     # Compute keccak256 of the payload
     hashed = Web3.keccak(text=payload)
 
-    # Sign the raw hash directly (no Ethereum message prefix)
-    # Use Web3's account signing method instead
-    w3 = Web3()
-    signed = w3.eth.account.signHash(hashed, private_key=SEARCHER_KEY)
+    # Sign the raw hash directly using Account.signHash
+    signed = Account.signHash(hashed, private_key=SEARCHER_KEY)
 
     # Return the Flashbots-required header format
     return f"{SEARCHER_ACCOUNT.address}:{signed.signature.hex()}"
