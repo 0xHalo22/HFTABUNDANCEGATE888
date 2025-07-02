@@ -38,4 +38,6 @@ def build_swap_tx(w3, amount_in_wei, slippage_tolerance=0.01):
     })
 
     signed = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
-    return Web3.to_hex(signed.rawTransaction)  # 🔥 This ensures string output
+    raw_hex = Web3.to_hex(signed.rawTransaction)
+    print("✅ Returning signed swap tx as hex:", raw_hex[:12], type(raw_hex))
+    return raw_hex
