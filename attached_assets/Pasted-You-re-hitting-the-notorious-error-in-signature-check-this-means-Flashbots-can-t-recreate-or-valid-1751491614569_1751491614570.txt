@@ -1,0 +1,81 @@
+You're hitting the notorious `error in signature check`—this means Flashbots can’t recreate or validate your signature. Based on logs and community insights, let's pinpoint exactly where things go wrong.
+
+---
+
+### 🔍 Common Pitfalls & Verified Fixes
+
+1. **Hex-string vs. Bytes in `encode_defunct()`**
+
+   * You’re using `encode_defunct(digest)` (passing raw bytes).
+   * The official docs and examples (ethers.js, Python) prefer using `encode_defunct(hexstr=digest.hex())`—that ensures correct EIP‑191 prefix wrapping ([docs.flashbots.net][1], [stackoverflow.com][2], [eth-account.readthedocs.io][3]).
+
+2. **Consistency in JSON serialization + POST method**
+
+   * The JSON must be serialized **once with** `sort_keys=True` and `separators=(",", ":")`, and then sent with `data=canonical_json` to avoid unseen reserialization .
+
+---
+
+### ✅ Updated Refactor with Both Fixes Applied
+
+```python
+import os
+import json
+from eth_account import Account
+from eth_account.messages import encode_defunct
+from web3 import Web3
+
+PRIVATE_KEY_SEARCHER = os.getenv("PRIVATE_KEY_SEARCHER")
+assert PRIVATE_KEY_SEARCHER, "Missing PRIVATE_KEY_SEARCHER"
+SEARCHER_ACCOUNT = Account.from_key(PRIVATE_KEY_SEARCHER)
+
+def sign_flashbots_payload(payload_dict: dict) -> (str, str):
+    canonical_json = json.dumps(payload_dict, separators=(",", ":"), sort_keys=True)
+    digest = Web3.keccak(canonical_json.encode("utf-8"))
+    message = encode_defunct(hexstr=digest.hex())
+    signed = SEARCHER_ACCOUNT.sign_message(message)
+    signature = signed.signature.hex()
+    header = f"{SEARCHER_ACCOUNT.address}:{signature}"
+    print("🧾 Payload:", canonical_json)
+    print("🔑 Digest:", digest.hex())
+    print("📦 EIP-191 Message:", message)
+    print("✍️ Signature:", signature)
+    print("🔐 Header:", header)
+    return header, canonical_json
+```
+
+And then call Flashbots like so:
+
+```python
+header, canonical_json = sign_flashbots_payload(payload_dict)
+response = requests.post(
+    "https://relay.flashbots.net",
+    headers={"Content-Type": "application/json", "X-Flashbots-Signature": header},
+    data=canonical_json
+)
+```
+
+---
+
+### 🧪 Why This Works
+
+* **`hexstr=digest.hex()`** ensures proper EIP‑191 wrapping according to Flashbots examples ([docs.flashbots.net][1]).
+* **POST via `data`** prevents Python's `requests` from reserializing the payload (changing whitespace or key order) .
+
+---
+
+### ✅ Final Checklist — All Must Be True
+
+* Canonical JSON using `sort_keys=True` & `separators=(",", ":")`
+* Posting via raw `data=canonical_json`, not `json=`
+* Digest from raw UTF-8 bytes
+* `encode_defunct(hexstr=...)`
+* Full 65-byte signature string
+* Header formatted as `0xAddress:0xSignature`
+
+---
+
+Implement these exact changes and your `-32600` / `403` error should vanish—Flashbots will authenticate your bundles. Let me know how it goes!
+
+[1]: https://docs.flashbots.net/flashbots-auction/advanced/rpc-endpoint?utm_source=chatgpt.com "JSON-RPC Endpoints - Flashbots Docs"
+[2]: https://stackoverflow.com/questions/70483970/flashbots-x-flashbots-signature-header-not-working-correctly-with-web3-py?utm_source=chatgpt.com "Flashbots \"X-Flashbots-Signature\" header not working correctly with ..."
+[3]: https://eth-account.readthedocs.io/en/v0.10.0/eth_account.html?utm_source=chatgpt.com "eth_account — eth-account 0.10.0 documentation"
