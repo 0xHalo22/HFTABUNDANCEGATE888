@@ -7,5 +7,5 @@ SEARCHER_ACCOUNT: LocalAccount = Account.from_key(PRIVATE_KEY_SEARCHER)
 
 def sign_flashbots_payload(payload: str) -> str:
     payload_hash = keccak(text=payload)
-    signed = SEARCHER_ACCOUNT.signHash(payload_hash)
+    signed = SEARCHER_ACCOUNT.sign_hash(payload_hash)
     return f"{SEARCHER_ACCOUNT.address}:{signed.signature.hex()}"
