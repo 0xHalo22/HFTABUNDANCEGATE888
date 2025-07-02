@@ -20,7 +20,21 @@ def build_signed_tx(w3, to_address, value_wei, gas=21000, gas_price_wei=None):
     }
 
     signed = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
-    return Web3.to_hex(signed.rawTransaction)
+
+    print("🚧 DEBUG: signed type =", type(signed))
+    print("🚧 DEBUG: signed keys/attrs =", dir(signed))
+
+
+    # ✅ Fully defensive handling of SignedTransaction or dict
+    if isinstance(signed, dict):
+        raw_tx = signed.get("rawTransaction")
+    else:
+        raw_tx = getattr(signed, "rawTransaction", None)
+
+    if raw_tx is None:
+        raise ValueError("rawTransaction could not be extracted from signed transaction.")
+
+    return Web3.to_hex(raw_tx)
 
 def get_address():
     return ACCOUNT.address

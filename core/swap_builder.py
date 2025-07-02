@@ -41,9 +41,27 @@ def build_swap_tx(w3, amount_in_wei, slippage_tolerance=0.01):
         "chainId": w3.eth.chain_id
     })
 
-    # Sign and return hex string
+    # Sign transaction
     signed_tx = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
-    hex_tx = Web3.to_hex(signed_tx.rawTransaction)
 
+    # 🧪 Debug the transaction object
+    print("🚧 signed_tx type:", type(signed_tx))
+    print("🚧 signed_tx dir:", dir(signed_tx))
+
+    # ✅ Safe rawTransaction extraction with all fallback cases
+    raw_tx = None
+    if isinstance(signed_tx, dict):
+        raw_tx = signed_tx.get("rawTransaction")
+    elif hasattr(signed_tx, "rawTransaction"):
+        raw_tx = signed_tx.rawTransaction
+    elif hasattr(signed_tx, "raw_transaction"):  # ✅ this matches your actual case
+        raw_tx = signed_tx.raw_transaction
+    elif hasattr(signed_tx, "raw"):
+        raw_tx = signed_tx.raw
+
+    if raw_tx is None:
+        raise ValueError("rawTransaction could not be extracted from signed transaction in build_swap_tx")
+
+    hex_tx = Web3.to_hex(raw_tx)
     print("✅ [SWAP BUILDER] Returning hex:", hex_tx[:12], type(hex_tx))
     return hex_tx

@@ -23,17 +23,16 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         print("↪ front_tx:", front_tx[:12], type(front_tx))
         print("↪ back_tx :", back_tx[:12], type(back_tx))
 
-        # Fetch raw hex of the victim tx
-        victim_raw = w3.eth.get_raw_transaction(victim_tx["hash"]).hex()
-        print("↪ victim_tx:", victim_raw[:12], type(victim_raw))
-
         # Sanity check
-        if not all(isinstance(tx, str) for tx in [front_tx, victim_raw, back_tx]):
+        if not all(isinstance(tx, str) for tx in [front_tx, back_tx]):
             print("❌ One or more txs are not hex strings!")
             return
 
+        # Use victim tx hash directly (Flashbots will resolve it)
+        print("↪ victim_tx hash:", tx_hash)
+
         # Create Flashbots bundle
-        bundle = [front_tx, victim_raw, back_tx]
+        bundle = [front_tx, tx_hash, back_tx]
         block_number = w3.eth.block_number + 1
 
         print(f"🧪 Flashbots bundle → block {block_number}:")
@@ -49,7 +48,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         sim = result.get("response", {}).get("result", {})
         eth_sent = int(sim.get("eth_sent_to_coinbase", "0x0"), 16) if sim else 0
         profit = eth_sent / 1e18
-        gas_cost = 0.0005
+        gas_cost = 0.0005  # Update this if you're using real gas tracking
         net = profit - gas_cost
 
         print(f"📈 Live PnL: +{net:.5f} ETH (gross: {profit:.5f}, gas: {gas_cost:.5f})")

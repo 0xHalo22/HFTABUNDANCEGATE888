@@ -19,13 +19,14 @@ def send_flashbots_bundle(bundle, block_number, w3):
             }]
         }
 
-        payload = json.dumps(payload_obj)
+        # Canonical form for signing AND sending
+        payload_str = json.dumps(payload_obj, separators=(",", ":"))
         headers = {
             "Content-Type": "application/json",
-            "X-Flashbots-Signature": sign_flashbots_payload(payload)
+            "X-Flashbots-Signature": sign_flashbots_payload(payload_str)
         }
 
-        response = requests.post(FLASHBOTS_URL, data=payload, headers=headers)
+        response = requests.post(FLASHBOTS_URL, data=payload_str, headers=headers)
 
         if response.status_code == 200:
             return {"success": True, "response": response.json()}
