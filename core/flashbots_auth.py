@@ -31,16 +31,26 @@ def sign_flashbots_payload(payload: str) -> str:
     print("🧾 Canonical JSON Payload:\n", payload)
     print("🔑 Keccak256 Digest:", digest.hex())
 
-    # TRY APPROACH 1: Direct signing of keccak256 hash (no EIP-191)
+    # TRY APPROACH 1: Direct signing using raw private key
     try:
-        # Get raw private key bytes and sign directly
-        private_key_bytes = SEARCHER_ACCOUNT._key_obj
-        signature = private_key_bytes.sign_msg_hash(digest)
+        from eth_keys import keys
+        
+        # Get raw private key from environment (remove 0x prefix if present)
+        raw_private_key = PRIVATE_KEY_SEARCHER
+        if raw_private_key.startswith('0x'):
+            raw_private_key = raw_private_key[2:]
+        
+        # Convert to bytes and create PrivateKey object
+        private_key_bytes = bytes.fromhex(raw_private_key)
+        private_key = keys.PrivateKey(private_key_bytes)
+        
+        # Sign the digest directly
+        signature = private_key.sign_msg_hash(digest)
         
         # Convert to 65-byte format: r (32) + s (32) + v (1)
         signature_hex = '0x' + signature.to_bytes().hex()
         
-        print("✍️ Direct Signature (65-byte):", signature_hex)
+        print("✍️ RAW KEY Direct Signature (65-byte):", signature_hex)
         print("🔐 Signer Address:", SEARCHER_ACCOUNT.address)
 
         # Step 4: Construct X-Flashbots-Signature header
@@ -50,7 +60,7 @@ def sign_flashbots_payload(payload: str) -> str:
         return header_value
         
     except Exception as e:
-        print(f"❌ Direct signing failed: {e}")
+        print(f"❌ RAW KEY Direct signing failed: {e}")
         
         # FALLBACK: EIP-191 method (our current approach)
         print("🔄 Falling back to EIP-191 method...")
