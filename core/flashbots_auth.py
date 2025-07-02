@@ -14,22 +14,15 @@ def sign_flashbots_payload(payload: str) -> str:
     message = encode_defunct(text=payload)
     signed = SEARCHER_ACCOUNT.sign_message(message)
     
-    # DEBUG: Print all signature components
+    # Build 64-byte signature from r,s components (without recovery ID)
+    r_hex = format(signed.r, '064x')  # 32 bytes (64 hex chars)
+    s_hex = format(signed.s, '064x')  # 32 bytes (64 hex chars)
+    signature_64_bytes = r_hex + s_hex  # Total: 64 bytes (128 hex chars)
+    
     print(f"🔬 Signature debug:")
-    print(f"  - signed type: {type(signed)}")
-    print(f"  - signed dir: {[attr for attr in dir(signed) if not attr.startswith('_')]}")
-    print(f"  - signature: {signed.signature.hex()}")
-    print(f"  - v: {signed.v}")
-    print(f"  - r: {signed.r}")
-    print(f"  - s: {signed.s}")
+    print(f"  - r: {r_hex}")
+    print(f"  - s: {s_hex}")
+    print(f"  - 64-byte signature: {signature_64_bytes}")
+    print(f"  - Length: {len(signature_64_bytes)} chars")
     
-    # Try the standard format (what we've been using)
-    signature_hex = signed.signature.hex()
-    
-    # Alternative: try without 0x prefix
-    signature_no_prefix = signature_hex[2:] if signature_hex.startswith('0x') else signature_hex
-    
-    print(f"  - signature with 0x: {signature_hex}")
-    print(f"  - signature without 0x: {signature_no_prefix}")
-    
-    return f"{SEARCHER_ACCOUNT.address}:{signature_hex}"
+    return f"{SEARCHER_ACCOUNT.address}:0x{signature_64_bytes}"
