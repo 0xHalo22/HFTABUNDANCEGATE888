@@ -31,6 +31,10 @@ def sign_flashbots_payload(payload: str) -> str:
     print("🧾 Canonical JSON Payload:\n", payload)
     print("🔑 Keccak256 Digest:", digest.hex())
 
+    # DEBUG: Check address consistency
+    print("🔍 ADDRESS VERIFICATION:")
+    print("  SEARCHER_ACCOUNT.address:", SEARCHER_ACCOUNT.address)
+    
     # TRY APPROACH 1: Direct signing using raw private key
     try:
         from eth_keys import keys
@@ -44,6 +48,11 @@ def sign_flashbots_payload(payload: str) -> str:
         private_key_bytes = bytes.fromhex(raw_private_key)
         private_key = keys.PrivateKey(private_key_bytes)
         
+        # Verify address derivation
+        derived_address = private_key.public_key.to_checksum_address()
+        print("  Raw key derived address:", derived_address)
+        print("  Addresses match:", derived_address == SEARCHER_ACCOUNT.address)
+        
         # Sign the digest directly
         signature = private_key.sign_msg_hash(digest)
         
@@ -51,7 +60,33 @@ def sign_flashbots_payload(payload: str) -> str:
         signature_hex = '0x' + signature.to_bytes().hex()
         
         print("✍️ RAW KEY Direct Signature (65-byte):", signature_hex)
-        print("🔐 Signer Address:", SEARCHER_ACCOUNT.address)
+        print("🔐 Using Address:", derived_address)
+        
+        # Try different signature recovery formats
+        print("🧪 SIGNATURE ANALYSIS:")
+        sig_bytes = signature.to_bytes()
+        print(f"  Signature length: {len(sig_bytes)} bytes")
+        print(f"  R: 0x{sig_bytes[:32].hex()}")
+        print(f"  S: 0x{sig_bytes[32:64].hex()}")
+        print(f"  V: {sig_bytes[64]}")
+        
+        # Test signature recovery
+        from eth_keys import keys as eth_keys
+        recovered_pubkey = eth_keys.Signature(sig_bytes).recover_public_key_from_msg_hash(digest)
+        recovered_address = recovered_pubkey.to_checksum_address()
+        print(f"  Recovered address: {recovered_address}")
+        print(f"  Recovery matches: {recovered_address == derived_address}")
+        
+        # Use the derived address (not SEARCHER_ACCOUNT.address) for header
+        header_value = f"{derived_address}:{signature_hex}"
+        print("✅ Final Header (X-Flashbots-Signature):", header_value)
+
+        return header_value
+        
+    except Exception as e:
+        print(f"❌ RAW KEY Direct signing failed: {e}")
+        import traceback
+        traceback.print_exc()
 
         # Step 4: Construct X-Flashbots-Signature header
         header_value = f"{SEARCHER_ACCOUNT.address}:{signature_hex}"
