@@ -3,7 +3,15 @@ import requests
 import json
 from core.flashbots_auth import sign_flashbots_payload
 
-FLASHBOTS_URL = "https://relay.flashbots.net"
+# Multiple relay endpoints - try different ones
+RELAY_ENDPOINTS = {
+    "flashbots": "https://relay.flashbots.net",
+    "mev_share": "https://relay-goerli.flashbots.net",  # MEV-Share endpoint
+    "eden": "https://api.edennetwork.io/v1/bundle",     # Eden Network
+}
+
+# Default to Flashbots for now
+FLASHBOTS_URL = RELAY_ENDPOINTS["flashbots"]
 
 def send_flashbots_bundle(bundle, block_number, w3):
     try:
