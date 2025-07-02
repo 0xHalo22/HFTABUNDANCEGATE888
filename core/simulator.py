@@ -13,7 +13,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         front_tx = build_signed_tx(w3, get_address(), eth_to_send)
         back_tx = build_signed_tx(w3, get_address(), eth_to_send)
 
-        # Bundle = our signed transactions ONLY
+        # These are already hex strings — DO NOT access rawTransaction
         bundle = [front_tx, back_tx]
         block_number = w3.eth.block_number + 1
 
@@ -23,7 +23,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             print(f"❌ Bundle submission failed: {result}")
             return
 
-        profit = result.get("eth_sent_to_coinbase", 0) / 1e18  # fake until tracking real outcome
+        profit = result.get("eth_sent_to_coinbase", 0) / 1e18  # placeholder logic
         gas_cost = 0.0002  # est gas cost
         net = profit - gas_cost
 
