@@ -11,13 +11,11 @@ def sign_flashbots_payload(payload: str) -> str:
     # Create the raw keccak hash that Flashbots expects
     payload_hash = keccak(text=payload)
     
-    # Convert hash to signable message format
-    message = encode_defunct(payload_hash)
+    # Sign the raw hash directly without any message prefix
+    # Flashbots expects a pure ECDSA signature of the keccak hash
+    signed = SEARCHER_ACCOUNT._private_key.sign_digest_deterministic(payload_hash)
     
-    # Sign the message
-    signed = SEARCHER_ACCOUNT.sign_message(message)
-    
-    # Convert to hex signature
-    signature = signed.signature.hex()
+    # Convert to hex signature  
+    signature = signed.to_hex()
     
     return f"{SEARCHER_ACCOUNT.address}:{signature}"
