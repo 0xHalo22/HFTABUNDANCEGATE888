@@ -1,39 +1,23 @@
-import os
-import time
-from web3 import Web3
-from web3.providers.websocket import WebsocketProvider
-from core.tx_filter import is_sandwich_candidate
+import asyncio
 from core.simulator import simulate_sandwich_bundle
+from core.tx_filter import is_valid_tx
 
-ALCHEMY_WSS = os.getenv("ALCHEMY_WSS")
-
-def listen_for_swaps(simulate=False):
+async def listen_for_swaps(w3):
+    print("🚨 Starting ETH-only HFT sniper live...")
     print("🔌 Connecting to WebSocket provider...")
-    w3 = Web3(WebsocketProvider(ALCHEMY_WSS))
-
-    seen = set()
     print("🔍 Listening for new pending transactions...")
 
-    while True:
+    async for tx in w3.eth.filter("pending").get_new_entries():
         try:
-            pending_tx_hashes = w3.eth.get_block('pending')['transactions']
+            tx_hash = tx.hex()
+            print(f"🔎 Scanning tx: {tx_hash}")
+            tx_data = w3.eth.get_transaction(tx_hash)
 
-            for tx_hash in pending_tx_hashes:
-                if tx_hash.hex() in seen:
-                    continue
-                seen.add(tx_hash.hex())
+            if is_valid_tx(tx_data):
+                print("✅ Valid tx detected — sending to execution")
+                await simulate_sandwich_bundle(tx_data, w3)
+            else:
+                print("⛔️ Skipped tx")
 
-                try:
-                    tx = w3.eth.get_transaction(tx_hash)
-                    print(f"🔎 Scanning tx: {tx['hash'].hex()}")  # Debug print
-
-                    if is_sandwich_candidate(tx, w3):
-                        print(f"🧠 Victim found: {tx['hash'].hex()}")
-                        simulate_sandwich_bundle(tx, w3)
-                except Exception:
-                    continue
-
-            time.sleep(1)  # Adjust to control polling frequency
         except Exception as e:
-            print(f"⚠️ Error polling mempool: {e}")
-            time.sleep(3)
+            print(f"❌ Error processing tx {tx.hex()}: {e}")
