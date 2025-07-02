@@ -1,61 +1,53 @@
+
 import requests
 import json
-from core.flashbots_auth import sign_flashbots_payload
+from web3 import Web3
 
-# Use MEV-Share public endpoint (no searcher registration required)
-FLASHBOTS_URL = "https://mev-share.flashbots.net"
-print(f"🔗 Using MEV-Share: {FLASHBOTS_URL}")
+# Use Titan Builder (no authentication required)
+TITAN_URL = "https://rpc.titanbuilder.xyz"
+print(f"🔗 Using Titan Builder: {TITAN_URL}")
 
-def send_flashbots_bundle(bundle, block_number, w3):
+def send_bundle_to_titan(front_tx_hex, victim_tx_hash, back_tx_hex, target_block):
     try:
-        # Check if block number is still valid
-        current_block = w3.eth.block_number
-        if block_number <= current_block:
-            print(f"⚠️ Block {block_number} already passed (current: {current_block})")
-            block_number = current_block + 1
-            print(f"🔄 Updated target block to: {block_number}")
-
-        # MEV-Share bundle format (simpler!)
-        payload_dict = {
-            "jsonrpc": "2.0", 
+        # Titan Builder bundle format (much simpler!)
+        payload = {
+            "jsonrpc": "2.0",
             "id": 1,
-            "method": "mev_sendBundle",  # MEV-Share method
+            "method": "eth_sendBundle",
             "params": [{
-                "version": "v0.1",
-                "inclusion": {
-                    "block": hex(block_number),
-                    "maxBlock": hex(block_number + 3)  # Allow inclusion in next 3 blocks
-                },
-                "body": bundle
+                "txs": [front_tx_hex, victim_tx_hash, back_tx_hex],
+                "blockNumber": Web3.to_hex(target_block),
+                "minTimestamp": 0,
+                "maxTimestamp": 0,
+                "revertingTxHashes": []
             }]
         }
 
-        print(f"📦 Bundle for block {block_number} (current: {current_block})")
-        print(f"📊 MEV-Share bundle with {len(bundle)} transactions")
-
-        # Use the fixed signature function
-        header_value, canonical_json = sign_flashbots_payload(payload_dict)
+        print(f"📦 Titan bundle for block {target_block}")
+        print(f"📊 Bundle with {len(payload['params'][0]['txs'])} transactions")
+        print(f"  🔗 front_tx: {front_tx_hex[:24]}...")
+        print(f"  🔗 victim_tx: {victim_tx_hash}")
+        print(f"  🔗 back_tx: {back_tx_hex[:24]}...")
 
         headers = {
-            "Content-Type": "application/json",
-            "X-Flashbots-Signature": header_value
+            "Content-Type": "application/json"
         }
 
-        print("🚀 Submitting bundle to Flashbots...")
+        print("🚀 Submitting bundle to Titan Builder...")
 
-        # Critical: Use data= not json= to prevent reserialization
-        response = requests.post(FLASHBOTS_URL, data=canonical_json, headers=headers, timeout=10)
+        response = requests.post(TITAN_URL, json=payload, headers=headers, timeout=10)
 
-        print(f"📡 Response status: {response.status_code}")
+        print(f"📡 Titan response status: {response.status_code}")
 
         if response.status_code == 200:
             result = response.json()
-            print("✅ Bundle submitted successfully!")
+            print("✅ Bundle submitted successfully to Titan!")
+            print(f"📄 Titan response: {result}")
             return {"success": True, "response": result}
         else:
             print(f"❌ HTTP {response.status_code}: {response.text}")
             return {"success": False, "error": f"HTTP {response.status_code}: {response.text}"}
 
     except Exception as e:
-        print(f"❌ Exception in bundle submission: {e}")
+        print(f"❌ Exception in Titan bundle submission: {e}")
         return {"success": False, "error": str(e)}
