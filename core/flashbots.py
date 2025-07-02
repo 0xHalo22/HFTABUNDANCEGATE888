@@ -3,17 +3,9 @@ import requests
 import json
 from core.flashbots_auth import sign_flashbots_payload
 
-# Multiple relay endpoints - try different ones
-RELAY_ENDPOINTS = {
-    "flashbots": "https://relay.flashbots.net",
-    "eden": "https://api.edennetwork.io/v1/bundle",     # Eden Network (might not require registration)
-    "beaverbuild": "https://rpc.beaverbuild.org/",     # Beaver Build
-    "rsync": "https://rsync-builder.xyz/",             # Rsync Builder
-}
-
-# Try Eden Network first (less restrictive)
-FLASHBOTS_URL = RELAY_ENDPOINTS["eden"]
-print(f"🔗 Using MEV relay: {FLASHBOTS_URL}")
+# Use MEV-Share (no registration required!)
+FLASHBOTS_URL = "https://relay.flashbots.net"
+print(f"🔗 Using MEV-Share: {FLASHBOTS_URL}")
 
 def send_flashbots_bundle(bundle, block_number, w3):
     try:
@@ -24,20 +16,18 @@ def send_flashbots_bundle(bundle, block_number, w3):
             block_number = current_block + 1
             print(f"🔄 Updated target block to: {block_number}")
 
-        # Get current timestamp for realistic timing
-        import time
-        current_time = int(time.time())
-        
+        # MEV-Share bundle format (simpler!)
         payload_dict = {
             "jsonrpc": "2.0", 
             "id": 1,
-            "method": "eth_sendBundle",
+            "method": "mev_sendBundle",  # MEV-Share method
             "params": [{
-                "txs": bundle,
-                "blockNumber": hex(block_number),
-                "minTimestamp": current_time,
-                "maxTimestamp": current_time + 60,
-                "revertingTxHashes": []
+                "version": "v0.1",
+                "inclusion": {
+                    "block": hex(block_number),
+                    "maxBlock": hex(block_number + 3)  # Allow inclusion in next 3 blocks
+                },
+                "body": bundle
             }]
         }
 
