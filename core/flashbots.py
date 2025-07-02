@@ -32,7 +32,7 @@ def send_flashbots_bundle(bundle, block_number, w3):
         }
 
         print(f"📦 Bundle for block {block_number} (current: {current_block})")
-        print(f"⏰ Timestamp window: {current_time} - {current_time + 60}")
+        print(f"📊 MEV-Share bundle with {len(bundle)} transactions")
         
         # Use the fixed signature function
         header_value, canonical_json = sign_flashbots_payload(payload_dict)
