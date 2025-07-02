@@ -16,7 +16,7 @@ def load_abi():
     with open("core/uniswap_v2_router_abi.json", "r") as f:
         return json.load(f)
 
-def build_swap_tx(w3, amount_in_wei, slippage_tolerance=0.01):
+def build_swap_tx(w3, amount_in_wei, slippage_tolerance=0.01, nonce_offset=0):
     router = w3.eth.contract(address=UNISWAP_ROUTER, abi=load_abi())
 
     path = [WETH_ADDRESS, DAI_ADDRESS]
@@ -26,7 +26,8 @@ def build_swap_tx(w3, amount_in_wei, slippage_tolerance=0.01):
     amounts_out = router.functions.getAmountsOut(amount_in_wei, path).call()
     min_out = int(amounts_out[1] * (1 - slippage_tolerance))
 
-    # Build transaction
+    # Build transaction with unique nonce
+    base_nonce = w3.eth.get_transaction_count(ACCOUNT.address)
     tx = router.functions.swapExactETHForTokens(
         min_out,
         path,
@@ -37,7 +38,7 @@ def build_swap_tx(w3, amount_in_wei, slippage_tolerance=0.01):
         "value": amount_in_wei,
         "gas": 250000,
         "gasPrice": w3.eth.gas_price,
-        "nonce": w3.eth.get_transaction_count(ACCOUNT.address),
+        "nonce": base_nonce + nonce_offset,
         "chainId": w3.eth.chain_id
     })
 

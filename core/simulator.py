@@ -21,9 +21,9 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         balance = w3.eth.get_balance(account.address)
         print(f"💰 Wallet balance: {w3.from_wei(balance, 'ether')} ETH")
 
-        # Build front-run and back-run txs (must return hex)
-        front_tx = build_swap_tx(w3, eth_to_send)
-        back_tx = build_swap_tx(w3, eth_to_send)
+        # Build front-run and back-run txs with different nonces (must return hex)
+        front_tx = build_swap_tx(w3, eth_to_send, nonce_offset=0)
+        back_tx = build_swap_tx(w3, eth_to_send, nonce_offset=2)
 
         print("✅ TX FORMAT CHECK")
         print("↪ front_tx:", front_tx[:12], type(front_tx))
