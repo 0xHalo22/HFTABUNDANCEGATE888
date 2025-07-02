@@ -11,11 +11,13 @@ def sign_flashbots_payload(payload: str) -> str:
     # Create the raw keccak hash that Flashbots expects
     payload_hash = keccak(text=payload)
     
-    # Use eth_account's built-in unsafe_hash signing 
-    # This signs the raw hash without any message prefix
-    signed = SEARCHER_ACCOUNT.unsafe_hash_and_sign(payload_hash)
+    # Sign the hash directly using the private key's sign method
+    # This creates a raw ECDSA signature without message prefixes
+    from eth_keys import keys
+    private_key = keys.PrivateKey(SEARCHER_ACCOUNT.key)
+    signature_obj = private_key.sign_msg_hash(payload_hash)
     
-    # Convert to hex signature
-    signature = signed.signature.hex()
+    # Convert to the hex format Flashbots expects
+    signature = signature_obj.to_hex()
     
     return f"{SEARCHER_ACCOUNT.address}:{signature}"
