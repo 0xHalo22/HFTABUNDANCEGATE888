@@ -33,10 +33,9 @@ def sign_flashbots_payload(payload: str) -> str:
 
     # TRY APPROACH 1: Direct signing of keccak256 hash (no EIP-191)
     try:
-        # Use Web3's built-in signing method directly on the hash
-        from eth_keys import keys
-        private_key = keys.PrivateKey(SEARCHER_ACCOUNT._key_obj)
-        signature = private_key.sign_msg_hash(digest)
+        # Get raw private key bytes and sign directly
+        private_key_bytes = SEARCHER_ACCOUNT._key_obj
+        signature = private_key_bytes.sign_msg_hash(digest)
         
         # Convert to 65-byte format: r (32) + s (32) + v (1)
         signature_hex = '0x' + signature.to_bytes().hex()
