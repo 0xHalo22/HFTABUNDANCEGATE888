@@ -32,7 +32,7 @@ class Executor:
 
             # Write to CSV
             print("[💾] Attempting to write to trade_log.csv...")
-            with open("trade_log.csv", mode="a", newline="") as file:
+            with open("data/trade_log.csv", mode="a", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow([timestamp, token_address, profit, gas_used, status])
             print("[✅] Trade successfully written to CSV.")
