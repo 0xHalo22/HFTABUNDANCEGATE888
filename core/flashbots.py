@@ -1,10 +1,9 @@
-
 import requests
 import json
 from core.flashbots_auth import sign_flashbots_payload
 
-# Use MEV-Share (no registration required!)
-FLASHBOTS_URL = "https://relay.flashbots.net"
+# Use MEV-Share public endpoint (no searcher registration required)
+FLASHBOTS_URL = "https://mev-share.flashbots.net"
 print(f"🔗 Using MEV-Share: {FLASHBOTS_URL}")
 
 def send_flashbots_bundle(bundle, block_number, w3):
@@ -33,7 +32,7 @@ def send_flashbots_bundle(bundle, block_number, w3):
 
         print(f"📦 Bundle for block {block_number} (current: {current_block})")
         print(f"📊 MEV-Share bundle with {len(bundle)} transactions")
-        
+
         # Use the fixed signature function
         header_value, canonical_json = sign_flashbots_payload(payload_dict)
 
@@ -43,12 +42,12 @@ def send_flashbots_bundle(bundle, block_number, w3):
         }
 
         print("🚀 Submitting bundle to Flashbots...")
-        
+
         # Critical: Use data= not json= to prevent reserialization
         response = requests.post(FLASHBOTS_URL, data=canonical_json, headers=headers, timeout=10)
 
         print(f"📡 Response status: {response.status_code}")
-        
+
         if response.status_code == 200:
             result = response.json()
             print("✅ Bundle submitted successfully!")
