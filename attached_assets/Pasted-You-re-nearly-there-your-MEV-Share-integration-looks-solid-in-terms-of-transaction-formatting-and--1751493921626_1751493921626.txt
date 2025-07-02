@@ -1,0 +1,117 @@
+You're nearly there — your MEV-Share integration looks solid in terms of transaction formatting and submission, but the issue lies in the **signature verification step**, based on this error:
+
+```
+❌ HTTP 403: {"id":1,"error":{"code":-32600,"message":"error in signature check 0x537d693ad5659A4373194c1B5D09dfcb45DD27f8"},"jsonrpc":"2.0"}
+```
+
+This means the Flashbots relay is rejecting the **bundle signature**, not the transactions inside the bundle. Here's how to fix it:
+
+---
+
+## ✅ Step-by-Step Fix
+
+### 1. **Verify Signature Key Format**
+
+Your authentication key used to sign the bundle must be:
+
+* A **valid secp256k1 private key**, in hex.
+* NOT your main ETH wallet (should be a separate signer identity).
+* Signed correctly per [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
+
+Double-check that this is how you're generating the signature:
+
+```python
+from eth_account.messages import encode_defunct
+from eth_account import Account
+
+def sign_flashbots_payload(payload: str, auth_private_key: str):
+    message = encode_defunct(hexstr=Web3.keccak(text=payload).hex())
+    signed_message = Account.sign_message(message, auth_private_key)
+    return signed_message.signature.hex()
+```
+
+This matches the requirement to sign the **hash of the canonical JSON** message using EIP-191 format.
+
+---
+
+### 2. **Check Header Format**
+
+The MEV-Share spec expects:
+
+```
+headers = {
+  "X-Flashbots-Signature": f"{signer_address}:{signature}"
+}
+```
+
+Ensure:
+
+* `signer_address` is derived from the **auth key**, not your wallet.
+* `signature` is in hex.
+* No `0x` prefix on the signature (sometimes required — test both).
+
+---
+
+### 3. **Verify Digest Signing Target**
+
+You're currently signing the digest:
+
+```python
+📦 EIP-191 Message: SignableMessage(version=b'E', header=b'thereum Signed Message:\n32', body=b'\xfb\x9f...')
+```
+
+Verify:
+
+* You're signing `keccak256(json.dumps(bundle_payload, separators=(',', ':')).encode())`
+* NOT double-hashing or accidentally mutating the payload after signing
+
+---
+
+### 4. **Confirm Request Headers**
+
+Set these headers **exactly**:
+
+```python
+headers = {
+    "Content-Type": "application/json",
+    "X-Flashbots-Signature": f"{searcher_address}:{signature}"
+}
+```
+
+Some bugs happen if the signature uses an old or malformed digest — recheck the version you sign vs. what you send.
+
+---
+
+### 5. **Test with Known Valid Key**
+
+To isolate the issue, try a clean Flashbots searcher keypair:
+
+```bash
+# Generate new key
+from eth_account import Account
+auth_key = Account.create()
+print("PRIVATE:", auth_key.key.hex())
+print("ADDRESS:", auth_key.address)
+```
+
+Swap this into your signature path and try a single test bundle.
+
+---
+
+### 6. **Final Debug Aid: Log Everything**
+
+Log:
+
+* Canonical JSON string before hashing
+* Digest (pre-sign)
+* Signature (post-sign)
+* Headers sent in request
+
+And match with:
+
+* Address derived from the auth key
+* Address in `X-Flashbots-Signature`
+
+---
+
+If you upload your `flashbots_auth.py` or your signature logic, I’ll do a line-by-line check for you. Let me know and I’ll pinpoint the fix.
