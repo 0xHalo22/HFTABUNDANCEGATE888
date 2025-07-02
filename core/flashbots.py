@@ -6,12 +6,14 @@ from core.flashbots_auth import sign_flashbots_payload
 # Multiple relay endpoints - try different ones
 RELAY_ENDPOINTS = {
     "flashbots": "https://relay.flashbots.net",
-    "mev_share": "https://relay-goerli.flashbots.net",  # MEV-Share endpoint
-    "eden": "https://api.edennetwork.io/v1/bundle",     # Eden Network
+    "eden": "https://api.edennetwork.io/v1/bundle",     # Eden Network (might not require registration)
+    "beaverbuild": "https://rpc.beaverbuild.org/",     # Beaver Build
+    "rsync": "https://rsync-builder.xyz/",             # Rsync Builder
 }
 
-# Default to Flashbots for now
-FLASHBOTS_URL = RELAY_ENDPOINTS["flashbots"]
+# Try Eden Network first (less restrictive)
+FLASHBOTS_URL = RELAY_ENDPOINTS["eden"]
+print(f"🔗 Using MEV relay: {FLASHBOTS_URL}")
 
 def send_flashbots_bundle(bundle, block_number, w3):
     try:
