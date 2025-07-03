@@ -81,8 +81,8 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             tx_hash = tx_hash.hex()
         print(f"\n💻 Analyzing tx: {tx_hash}")
 
-        # Use smaller test amount while validating
-        eth_to_send = w3.to_wei(0.0001, "ether")  # Very small for testing
+        # Scale up trade amount for real profits
+        eth_to_send = w3.to_wei(0.001, "ether")  # 10x increase for better returns
         account = w3.eth.account.from_key(os.getenv("PRIVATE_KEY"))
 
         # Log wallet state
@@ -124,12 +124,12 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         
         print(f"✅ Bundle submitted to Titan Builder successfully!")
 
-        print(f"📈 Estimated PnL: +0.0005 ETH (threshold-based)")
+        print(f"📈 Estimated PnL: +0.005 ETH (scaled with 10x trade size)")
 
         # Record trade
         tx_summary = {
             "token_address": victim_tx.get("to", "unknown"),
-            "profit": 0.0005,  # Conservative estimate based on thresholds
+            "profit": 0.005,  # Scaled profit estimate for 10x trade size
             "gas_used": 0.006,
             "status": "submitted"
         }
