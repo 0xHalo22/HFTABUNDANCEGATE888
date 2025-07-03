@@ -15,34 +15,31 @@ def is_valid_tx(tx):
     # TESTING MODE: No value filter - any DEX transaction is profitable!
     print(f"  🧪 TEST MODE: Skipping value checks - all DEX txs are fair game!")
 
-    # Filter 1: Expanded DEX addresses (more inclusive)
+    # Filter 1: VERIFIED DEX ROUTERS ONLY (Security Audit Applied)
     known_dex_addresses = {
-        "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",  # Uniswap V2 Router
-        "0xf164fc0ec4e93095b804a4795bbe1e041497b92a",  # Uniswap V2 Router (old)
+        # Uniswap Routers (Verified)
+        "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",  # Uniswap V2 Router (Primary)
         "0xe592427a0aece92de3edee1f18e0157c05861564",  # Uniswap V3 Router
         "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",  # Uniswap V3 Router 2
-        "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",  # SushiSwap Router
-        "0x1b02da8cb0d097eb8d57a175b88c7d8b47997506",  # SushiSwap Router V2
-        "0xef1c6e67703c7bd7107eed8303fbe6ec2554bf6b",  # Uniswap Universal Router
+        "0xef1c6e67703c7bd7107eed8303fbe6ec2554bf6b",  # Uniswap Universal Router V1
         "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad",  # Uniswap Universal Router V2
-        "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",  # Lido stETH
-        # Add recent high-value addresses from logs
-        "0x881374ab1e22f6",  # 40 ETH transaction target
-        "0x2cbad16d1db55b",  # 0.312 ETH transaction target  
-        "0xddc0e63d05ee3a",  # 0.384 ETH transaction target
-        "0x1edca7ea0f61b4",  # 0.384 ETH transaction target
-        "0x7bdb61d76ab223",  # 0.175 ETH transaction target
-        "0xcbd6832ebc203e",  # 0.167 ETH transaction target
-        "0x380153c2105879",  # 0.058 ETH transaction target
-        "0xddf77a55dabb16",  # 0.111 ETH transaction target
-        "0xeba88149813bec",  # 0.015 ETH transaction target
-        # Popular aggregators and bridges
-        "0x663dc15d3c1ac63ff12e45ab68fea3f0a883c251",  # Additional DEX
-        "0xa26148ae51fa8e787df319c04137602cc018b521",  # Additional DEX
-        "0x25844d76468ca491cf9b3d8d3aec958200ca99d1",  # Additional DEX
-        "0x101352f507bd5103b3c23fd39c02cc686ec221055a",  # Additional DEX
-        "0xbea9f7fd27f4ee20066f18def0bc586ec221055a",  # Additional DEX
+        
+        # SushiSwap Routers (Verified)
+        "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",  # SushiSwap Router V1
+        "0x1b02da8cb0d097eb8d57a175b88c7d8b47997506",  # SushiSwap Router V2
+        
+        # 1inch Router (Major Aggregator - Verified)
+        "0x1111111254eeb25477b68fb85ed929f73a960582",  # 1inch V5 Router
+        
+        # 0x Protocol (Verified)
+        "0xdef1c0ded9bec7f1a1670819833240f027b25eff",  # 0x Exchange Proxy
     }
+    
+    # 🚨 SECURITY: Log unknown addresses for investigation
+    if to_address not in known_dex_addresses and value > 0:
+        print(f"  🚨 UNKNOWN ADDRESS DETECTED: {to_address}")
+        print(f"     💰 Value: {value / 1e18:.6f} ETH - INVESTIGATE BEFORE ADDING!")
+        print(f"     📝 Add to investigation log for manual review")
 
     if to_address not in known_dex_addresses:
         print(f"  ❌ SKIP: Not a known DEX address")
