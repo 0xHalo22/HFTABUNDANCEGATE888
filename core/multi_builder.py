@@ -9,8 +9,7 @@ BUILDERS = {
     "titan": "https://rpc.titanbuilder.xyz",
     "eden": "https://builder0x69.io", 
     "rsync": "https://rsync-builder.xyz",
-    "payload": "https://rpc.payload.de",
-    "nfactorial": "https://rpc.nfactorial.xyz"
+    "payload": "https://rpc.payload.de"
 }
 
 async def submit_bundle_to_all_builders(front_tx, victim_tx_hash, back_tx, target_block, coinbase_bribe):
@@ -88,18 +87,7 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
                 }]
             }
         
-        # Fix Nfactorial builder - use standard format without refundPercent
-        elif builder_name == "nfactorial":
-            payload_to_send = {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "eth_sendBundle",
-                "params": [{
-                    "txs": bundle_payload["params"][0]["txs"],
-                    "blockNumber": bundle_payload["params"][0]["blockNumber"]
-                    # Remove refundPercent - not supported by Nfactorial
-                }]
-            }
+        
         
         async with aiohttp.ClientSession(timeout=timeout) as session:
             headers = {"Content-Type": "application/json"}
