@@ -15,24 +15,19 @@ def is_valid_tx(tx):
     # TESTING MODE: No value filter - any DEX transaction is profitable!
     print(f"  🧪 TEST MODE: Skipping value checks - all DEX txs are fair game!")
 
-    # Filter 1: VERIFIED DEX ROUTERS ONLY (Security Audit Applied)
+    # Filter 1: OFFICIAL VERIFIED DEX ROUTERS ONLY (From Security Audit)
     known_dex_addresses = {
-        # Uniswap Routers (Verified)
-        "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",  # Uniswap V2 Router (Primary)
-        "0xe592427a0aece92de3edee1f18e0157c05861564",  # Uniswap V3 Router
-        "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",  # Uniswap V3 Router 2
-        "0xef1c6e67703c7bd7107eed8303fbe6ec2554bf6b",  # Uniswap Universal Router V1
-        "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad",  # Uniswap Universal Router V2
+        # 🟢 Uniswap Routers (Official Verified List)
+        "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",  # Uniswap V2 Router02 (Most common)
+        "0xf164fc0ec4e93095b804a4795bbe1e041497b92a",  # Uniswap V2 Legacy Router (Deprecated but live)
+        "0xe592427a0aece92de3edee1f18e0157c05861564",  # Uniswap V3 Router (Single-hop)
+        "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",  # Uniswap V3 Router 2 (Multicall & complex routing)
+        "0xef1c6e67703c7bd7107eed8303fbe6ec2554bf6b",  # Uniswap Universal Router (Next-gen)
+        "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad",  # Universal Router V2 (ETH & Base)
         
-        # SushiSwap Routers (Verified)
-        "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",  # SushiSwap Router V1
+        # 🟢 SushiSwap Routers (Official Verified List)
+        "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",  # SushiSwap Router V1 (Legacy)
         "0x1b02da8cb0d097eb8d57a175b88c7d8b47997506",  # SushiSwap Router V2
-        
-        # 1inch Router (Major Aggregator - Verified)
-        "0x1111111254eeb25477b68fb85ed929f73a960582",  # 1inch V5 Router
-        
-        # 0x Protocol (Verified)
-        "0xdef1c0ded9bec7f1a1670819833240f027b25eff",  # 0x Exchange Proxy
     }
     
     # 🚨 SECURITY: Log unknown addresses for investigation
