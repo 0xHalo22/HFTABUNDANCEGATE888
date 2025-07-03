@@ -120,52 +120,28 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             tx_hash = tx_hash.hex()
         print(f"\n💻 Analyzing tx: {tx_hash}")
         
-        # ✅ FIX: For pending transactions, we need to reconstruct the raw transaction
+        # ✅ BEAVERBUILD FIX: Get full raw transaction data from blockchain
         try:
-            # For pending transactions, we have the transaction object, let's reconstruct raw data
-            if victim_tx.get('blockNumber') is None:  # Pending transaction
-                print(f"🔧 PENDING TX: Reconstructing raw transaction data...")
-                
-                # Build raw transaction from pending tx data
-                raw_tx_data = {
-                    'nonce': victim_tx['nonce'],
-                    'gasPrice': victim_tx.get('gasPrice', w3.eth.gas_price),
-                    'gas': victim_tx['gas'],
-                    'to': victim_tx['to'],
-                    'value': victim_tx['value'],
-                    'data': victim_tx.get('input', '0x'),
-                    'chainId': w3.eth.chain_id
-                }
-                
-                # Handle EIP-1559 transactions
-                if 'maxFeePerGas' in victim_tx:
-                    raw_tx_data['type'] = 2
-                    raw_tx_data['maxFeePerGas'] = victim_tx['maxFeePerGas']
-                    raw_tx_data['maxPriorityFeePerGas'] = victim_tx['maxPriorityFeePerGas']
-                    del raw_tx_data['gasPrice']  # Remove gasPrice for EIP-1559
-                
-                # For bundle submission, we actually just need the hash for most builders
-                victim_tx_hex = tx_hash
-                print(f"✅ VICTIM TX HASH: {victim_tx_hex} (using hash format)")
-                
-            else:
-                # For confirmed transactions, try to get raw data
-                if hasattr(w3.provider, 'make_request'):
-                    raw_response = w3.provider.make_request("eth_getRawTransactionByHash", [tx_hash])
-                    if raw_response.get("result"):
-                        victim_tx_hex = raw_response["result"]
-                        print(f"✅ VICTIM RAW TX: {victim_tx_hex[:24]}... (from blockchain)")
-                    else:
-                        victim_tx_hex = tx_hash
-                        print(f"⚠️  VICTIM HASH: {victim_tx_hex} (fallback)")
+            # For pending transactions, try to get raw transaction data
+            if hasattr(w3.provider, 'make_request'):
+                # Use raw RPC call to get transaction with raw data
+                raw_response = w3.provider.make_request("eth_getRawTransactionByHash", [tx_hash])
+                if raw_response.get("result"):
+                    victim_tx_hex = raw_response["result"]
+                    print(f"✅ VICTIM RAW TX: {victim_tx_hex[:24]}... (from eth_getRawTransactionByHash)")
                 else:
+                    # Fallback: use transaction hash for builders that accept it
                     victim_tx_hex = tx_hash
-                    print(f"⚠️  VICTIM HASH: {victim_tx_hex} (provider limitation)")
+                    print(f"⚠️  VICTIM FALLBACK: {victim_tx_hex[:24]}... (using hash - may fail on Beaverbuild)")
+            else:
+                # If provider doesn't support raw requests, use hash
+                victim_tx_hex = tx_hash
+                print(f"⚠️  VICTIM FALLBACK: {victim_tx_hex[:24]}... (provider limitation)")
             
         except Exception as e:
-            print(f"❌ Failed to process victim transaction: {e}")
+            print(f"❌ Failed to get raw victim transaction: {e}")
+            print(f"⚠️  FALLBACK: Using transaction hash")
             victim_tx_hex = tx_hash
-            print(f"⚠️  VICTIM FALLBACK: {victim_tx_hex} (using hash)")
 
         # Scale trade amount with victim value for optimal profits
         victim_value = victim_tx.get("value", 0)
