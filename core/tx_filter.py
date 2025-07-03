@@ -26,7 +26,7 @@ def is_valid_tx(tx):
         print(f"  ❌ GAS TOO LOW: {gas_price / 1e9:.1f} gwei < 0.1 gwei minimum")
         return False
     
-    print(f"  ✅ VICTIM QUALIFIES: {value / 1e18:.6f} ETH value, {gas_price / 1e9:.1f} gwei gas")e fair game!")
+    print(f"  ✅ VICTIM QUALIFIES: {value / 1e18:.6f} ETH value, {gas_price / 1e9:.1f} gwei gas")
 
     # Filter 1: OFFICIAL VERIFIED DEX ROUTERS ONLY (From Security Audit)
     known_dex_addresses = {
