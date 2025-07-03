@@ -262,14 +262,26 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             print(f"📈 Estimated PnL: +{estimated_profit / 1e18:.6f} ETH")
             print(f"🔍 MONITORING: Will check block {target_block} for inclusion...")
 
-            # Record the trade attempt
-            await executor.handle_profitable_trade({
+            # Record the trade attempt with enhanced tracking
+            trade_data = {
                 "timestamp": time.time(),
+                "tx_hash": tx_hash,
                 "token_address": victim_tx.get("to", "unknown"),
-                "profit": estimated_profit / 1e18,
-                "gas_used": 0.006,  # Estimated gas cost
+                "bundle_hash": bundle_hash,
+                "target_blocks": target_blocks,
+                "bribe_amount": coinbase_bribe / 1e18,
+                "estimated_profit": estimated_profit / 1e18,
+                "gas_used": 0.006,
                 "status": "submitted"
-            })
+            }
+            
+            await executor.handle_profitable_trade(trade_data)
+            
+            # Add to pending monitoring list for inclusion checking
+            print(f"🔍 MONITORING: Tracking bundle {bundle_hash[:16]}... for inclusion in blocks {target_blocks}")
+            print(f"💰 ESTIMATED TOTAL PROFIT: {estimated_profit / 1e18:.6f} ETH")
+            print(f"🧮 BRIBE COST: {coinbase_bribe / 1e18:.6f} ETH")
+            print(f"📊 NET ESTIMATED: {(estimated_profit - coinbase_bribe) / 1e18:.6f} ETH")
         else:
             error_reason = result.get("error", "Unknown error")
             print(f"❌ TITAN submission failed: {error_reason}")
