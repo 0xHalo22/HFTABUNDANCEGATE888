@@ -8,6 +8,10 @@ async def listen_for_swaps(w3):
     print("🔍 Listening for new pending transactions...")
 
     tx_filter = w3.eth.filter("pending")
+    
+    # Processing counters
+    total_processed = 0
+    valid_found = 0
 
     while True:
         try:
@@ -16,10 +20,17 @@ async def listen_for_swaps(w3):
             for tx_hash in pending_tx_hashes:
                 try:
                     tx = w3.eth.get_transaction(tx_hash)
+                    total_processed += 1
 
                     if is_valid_tx(tx):
-                        print("🎯 Sending to execution pipeline...")
+                        valid_found += 1
+                        print(f"🎯 EXECUTION TRIGGER! ({valid_found} valid / {total_processed} total)")
                         await simulate_sandwich_bundle(tx, w3)
+                    
+                    # Log stats every 100 transactions
+                    if total_processed % 100 == 0:
+                        success_rate = (valid_found / total_processed) * 100
+                        print(f"\n📊 SCANNING STATS: {valid_found}/{total_processed} valid ({success_rate:.2f}%)\n")
 
                 except Exception as e:
                     print(f"❌ Error fetching tx data: {e}")
