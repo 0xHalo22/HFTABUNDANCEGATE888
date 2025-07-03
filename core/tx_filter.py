@@ -12,13 +12,10 @@ def is_valid_tx(tx):
     print(f"  💰 Value: {value / 1e18:.6f} ETH")
     print(f"  ⛽ Gas Price: {gas_price / 1e9:.1f} gwei")
     
-    # Filter 1: Very small minimum for testing (0.001 ETH = ~$4)
-    min_value_wei = 1000000000000000  # 0.001 ETH in wei
-    if value < min_value_wei:
-        print(f"  ❌ SKIP: Value too low ({value / 1e18:.6f} ETH < 0.001 ETH)")
-        return False
+    # TESTING MODE: No value filter - any DEX transaction is profitable!
+    print(f"  🧪 TEST MODE: Skipping value checks - all DEX txs are fair game!")
     
-    # Filter 2: Expanded DEX addresses (more inclusive)
+    # Filter 1: Expanded DEX addresses (more inclusive)
     known_dex_addresses = {
         "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",  # Uniswap V2 Router
         "0xf164fc0ec4e93095b804a4795bbe1e041497b92a",  # Uniswap V2 Router (old)
@@ -40,7 +37,7 @@ def is_valid_tx(tx):
         print(f"  ❌ SKIP: Not a known DEX address")
         return False
     
-    # Filter 3: Higher gas price tolerance (200 gwei instead of 100)
+    # Filter 2: Higher gas price tolerance (200 gwei instead of 100)
     max_gas_price = 200000000000  # 200 gwei (was 100)
     if gas_price > max_gas_price:
         print(f"  ❌ SKIP: Gas price too high ({gas_price / 1e9:.1f} gwei > 200 gwei)")
