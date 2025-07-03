@@ -9,7 +9,8 @@ BUILDERS = {
     "titan": "https://rpc.titanbuilder.xyz",
     "eden": "https://builder0x69.io", 
     "rsync": "https://rsync-builder.xyz",
-    "beaverbuild": "https://rpc.beaverbuild.org"
+    "payload": "https://rpc.payload.de",
+    "nfactorial": "https://rpc.nfactorial.xyz"
 }
 
 async def submit_bundle_to_all_builders(front_tx, victim_tx_hash, back_tx, target_block, coinbase_bribe):
@@ -71,27 +72,7 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
     try:
         timeout = aiohttp.ClientTimeout(total=3)  # 3 second timeout
         
-        # Special handling for Beaverbuild - ensure proper raw transaction format
-        if builder_name == "beaverbuild":
-            # Validate that all transactions are properly hex-encoded raw transactions
-            txs = bundle_payload["params"][0]["txs"]
-            for i, tx in enumerate(txs):
-                if not isinstance(tx, str) or not tx.startswith("0x"):
-                    print(f"❌ BEAVERBUILD: Invalid tx format at index {i}: {type(tx)}")
-                    return {
-                        "success": False,
-                        "builder": builder_name,
-                        "error": f"Invalid transaction format at index {i}"
-                    }
-                # Check if transaction looks like raw transaction data (not just a hash)
-                if len(tx) < 100:  # Raw transactions are much longer than 66-char hashes
-                    print(f"❌ BEAVERBUILD: Transaction at index {i} appears to be hash, not raw tx: {tx[:24]}...")
-                    return {
-                        "success": False,
-                        "builder": builder_name,
-                        "error": f"Beaverbuild requires raw transaction data, not hash at index {i}"
-                    }
-            print(f"✅ BEAVERBUILD: All transactions validated as raw transaction data")
+        
         
         async with aiohttp.ClientSession(timeout=timeout) as session:
             headers = {"Content-Type": "application/json"}
