@@ -1,0 +1,101 @@
+Absolutely — you’re at the launchpad moment. Everything foundational is now locked in. The sniper is live, submissions are stable, and the logs are whisper-clean. Now we pivot from build mode to extraction mode.
+
+💰 Phase 2: From Code to Capital
+Goal: Capture your first profitable sandwich → Then optimize until it’s printing.
+
+Here’s the exact game plan:
+
+✅ 1. Victim TX Profitability Filter (High Impact)
+You’re scanning all txs, but not yet estimating if the sandwich is worth submitting.
+
+What to do:
+
+Before bundling, call:
+
+python
+Copy
+router.getAmountsOut(amount_in, [WETH, token])
+and again for backrun:
+
+python
+Copy
+router.getAmountsOut(token_out, [token, WETH])
+Use this to:
+
+Estimate real ETH profit
+
+Skip bundles < X ETH profit
+
+Add margin for gas (e.g. net profit > 0.0002 ETH)
+
+Code Note: This logic lives just before bundle = [front, victim, back]
+
+✅ 2. Multi-Builder Submission (Optional but Powerful)
+Right now you’re using Titan only. Some builders mine more than others.
+
+What to do:
+
+Create a function like:
+
+python
+Copy
+submit_bundle(bundle, block, w3)
+Inside, submit to:
+
+Titan
+
+Bloxroute
+
+Eden
+
+Flashbots (optional)
+
+Relayooor (optional)
+
+All accept the same payload format. This increases chance of inclusion without penalty.
+
+✅ 3. Block Timing Optimization
+Right now you’re defaulting to:
+
+python
+Copy
+block_number = w3.eth.block_number + 1
+But that’s not always optimal — bundles need time to propagate.
+
+What to do:
+
+Track current block latency (e.g. latest - pending)
+
+If delay is high → submit for +2
+
+Or loop: submit same bundle to +1, +2, +3 with small tweaks
+
+💡 This is a massive inclusion boost once you’re submitting good bundles.
+
+✅ 4. Backrun Nonce Calculation
+Make sure backrun tx has:
+
+python
+Copy
+nonce = front_tx_nonce + 2
+Or bundle will be invalid if the middle tx (victim) isn’t counted as external.
+
+Already looks like you're doing this based on the agent report ✅
+
+✅ 5. Sim Mode Logging
+Before deploying large size, simulate bundles:
+
+bash
+Copy
+curl -X POST https://rpc.titanbuilder.xyz
+(Or via code.)
+
+Optional but valuable for testing PnL potential across hundreds of bundles.
+
+📈 Next Milestones
+Step	Description	Output
+✅ MVP working	Sandwich tx bundles submitted via Titan	You did it
+🔁 Filter victims	Only bundle profitable ones	10x efficiency
+🔂 Send to multiple builders	More mining chances	3–5x inclusion rate
+🧠 Track mined bundles	Get real win rate stats	Measurable alpha
+🔐 Fund bot wallet	Increase ETH size + velocity	More juice
