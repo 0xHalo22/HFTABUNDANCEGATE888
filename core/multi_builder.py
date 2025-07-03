@@ -75,29 +75,30 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
         # Create builder-specific payload variants
         payload_to_send = bundle_payload.copy()
         
-        # Fix Payload builder - remove refundPercent and use different method
+        # Fix Payload builder - use standard eth_sendBundle with minimal params
         if builder_name == "payload":
             payload_to_send = {
                 "jsonrpc": "2.0",
                 "id": 1,
-                "method": "mev_sendBundle",  # Different method
+                "method": "eth_sendBundle",  # Back to standard method
                 "params": [{
                     "txs": bundle_payload["params"][0]["txs"],
                     "blockNumber": bundle_payload["params"][0]["blockNumber"]
-                    # Remove refundPercent - not supported
+                    # Remove refundPercent - not supported by Payload
                 }]
             }
         
-        # Fix Nfactorial builder - use minimal format
+        # Fix Nfactorial builder - use standard format without refundPercent
         elif builder_name == "nfactorial":
             payload_to_send = {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "eth_sendBundle",
-                "params": [
-                    bundle_payload["params"][0]["txs"],  # Direct array format
-                    bundle_payload["params"][0]["blockNumber"]
-                ]
+                "params": [{
+                    "txs": bundle_payload["params"][0]["txs"],
+                    "blockNumber": bundle_payload["params"][0]["blockNumber"]
+                    # Remove refundPercent - not supported by Nfactorial
+                }]
             }
         
         async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -113,6 +114,7 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
                     }
                 else:
                     error_text = await response.text()
+                    print(f"❌ {builder_name.upper()} HTTP {response.status}: {error_text[:200]}")
                     return {
                         "success": False,
                         "builder": builder_name,
