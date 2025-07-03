@@ -28,6 +28,10 @@ def build_swap_tx(w3, amount_in_wei, slippage_tolerance=0.01, nonce_offset=0):
 
     # Build transaction with unique nonce
     base_nonce = w3.eth.get_transaction_count(ACCOUNT.address)
+    # Bid 20% above current gas price for better inclusion
+    base_gas_price = w3.eth.gas_price
+    gas_price = int(base_gas_price * 1.2)
+    print(f"⛽ Bidding {w3.from_wei(gas_price, 'gwei'):.1f} gwei (20% above base)")
     tx = router.functions.swapExactETHForTokens(
         min_out,
         path,
@@ -37,7 +41,7 @@ def build_swap_tx(w3, amount_in_wei, slippage_tolerance=0.01, nonce_offset=0):
         "from": ACCOUNT.address,
         "value": amount_in_wei,
         "gas": 250000,
-        "gasPrice": w3.eth.gas_price,
+        "gasPrice": gas_price,
         "nonce": base_nonce + nonce_offset,
         "chainId": w3.eth.chain_id
     })

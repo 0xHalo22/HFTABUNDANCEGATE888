@@ -113,10 +113,27 @@ async def simulate_sandwich_bundle(victim_tx, w3):
 
         print(f"🎯 Targeting block {target_block} (current: {current_block})")
 
-        # Submit bundle to Titan Builder only for reliability
-        from core.flashbots import send_bundle_to_titan
+        # Submit to multiple builders for higher inclusion rate
+        from core.multi_builder import submit_to_multiple_builders
+        import asyncio
         
-        result = send_bundle_to_titan(front_tx, tx_hash, back_tx, target_block)
+        results = await submit_to_multiple_builders(front_tx, tx_hash, back_tx, target_block)
+        
+        # Log all submission results
+        successful_submissions = 0
+        for builder, result in results.items():
+            if result.get("success"):
+                successful_submissions += 1
+                print(f"✅ {builder.upper()}: Bundle submitted successfully")
+            else:
+                print(f"❌ {builder.upper()}: {result.get('error', 'Unknown error')}")
+        
+        if successful_submissions == 0:
+            print("❌ All builder submissions failed")
+            return
+        
+        print(f"🚀 Bundle submitted to {successful_submissions}/3 builders!")
+        result = {"success": True, "builders": successful_submissions}
         
         if not result.get("success"):
             print(f"❌ Titan submission failed: {result}")
