@@ -36,7 +36,7 @@ def get_bribe_params(attempt, base_fee_wei):
     # Max fee = base fee + priority fee * 2 (EIP-1559 standard)
     max_fee_wei = base_fee_wei + (priority_fee_wei * 2)
     
-    print(f"⚡ ESCALATED BRIBE #{attempt}: Priority={priority_fee_gwei:.1f} gwei, MaxFee={max_fee_wei/1e9:.1f} gwei")
+    print(f"🚀 Titan bundle → Block {attempt + 1} | Prio: {priority_fee_gwei:.1f} gwei | MaxFee: {max_fee_wei/1e9:.1f} gwei")
     return priority_fee_wei, max_fee_wei
 
 def calculate_dynamic_bribe(base_fee_wei, multiplier=None):
