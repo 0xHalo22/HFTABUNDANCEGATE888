@@ -26,8 +26,8 @@ def calculate_sandwich_profit(w3, victim_tx, eth_amount):
         victim_to = victim_tx.get("to", "").lower()
         victim_value = victim_tx.get("value", 0)
         
-        # FIXED: Match the filter threshold (0.01 ETH, not 0.05)
-        if victim_value < w3.to_wei(0.01, "ether"):
+        # FIXED: Match the filter threshold (0.005 ETH)
+        if victim_value < w3.to_wei(0.005, "ether"):
             print(f"⛔ Victim tx value too low: {w3.from_wei(victim_value, 'ether')} ETH")
             return 0
         

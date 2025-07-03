@@ -6,13 +6,13 @@ def is_valid_tx(tx):
     to_address = tx.get('to', '').lower()
     value = tx.get('value', 0)
     
-    # Filter 1: MUCH lower minimum for testing (0.01 ETH = ~$40)
-    min_value_wei = 10000000000000000  # 0.01 ETH in wei (was 0.05)
+    # Filter 1: Even lower minimum for testing (0.005 ETH = ~$20)
+    min_value_wei = 5000000000000000  # 0.005 ETH in wei (was 0.01)
     if value < min_value_wei:
-        print(f"⛔ [FILTER] Low value tx: {value / 1e18:.6f} ETH < 0.01 ETH threshold")
+        print(f"⛔ [FILTER] Low value tx: {value / 1e18:.6f} ETH < 0.005 ETH threshold")
         return False
     
-    # Filter 2: Expanded DEX addresses
+    # Filter 2: Expanded DEX addresses (more inclusive)
     known_dex_addresses = {
         "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",  # Uniswap V2 Router
         "0xf164fc0ec4e93095b804a4795bbe1e041497b92a",  # Uniswap V2 Router (old)
@@ -22,6 +22,12 @@ def is_valid_tx(tx):
         "0x1b02da8cb0d097eb8d57a175b88c7d8b47997506",  # SushiSwap Router V2
         "0xef1c6e67703c7bd7107eed8303fbe6ec2554bf6b",  # Uniswap Universal Router
         "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad",  # Uniswap Universal Router V2
+        "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",  # Lido stETH
+        "0x663dc15d3c1ac63ff12e45ab68fea3f0a883c251",  # Additional DEX
+        "0xa26148ae51fa8e787df319c04137602cc018b521",  # Additional DEX
+        "0x25844d76468ca491cf9b3d8d3aec958200ca99d1",  # Additional DEX
+        "0x101352f507bd5103b3c23fd39899165cf0c4d8c8",  # Additional DEX
+        "0xbea9f7fd27f4ee20066f18def0bc586ec221055a",  # Additional DEX
     }
     
     if to_address not in known_dex_addresses:
