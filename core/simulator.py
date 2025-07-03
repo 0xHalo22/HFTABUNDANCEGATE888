@@ -120,27 +120,78 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             tx_hash = tx_hash.hex()
         print(f"\n💻 Analyzing tx: {tx_hash}")
         
-        # ✅ BEAVERBUILD FIX: Get full raw transaction data from blockchain
+        # ✅ PAYLOAD FIX: Get full raw transaction data from blockchain
         try:
-            # For pending transactions, try to get raw transaction data
+            # Try multiple methods to get raw transaction data
+            victim_tx_hex = None
+            
+            # Method 1: Use eth_getRawTransactionByHash RPC call
             if hasattr(w3.provider, 'make_request'):
-                # Use raw RPC call to get transaction with raw data
-                raw_response = w3.provider.make_request("eth_getRawTransactionByHash", [tx_hash])
-                if raw_response.get("result"):
-                    victim_tx_hex = raw_response["result"]
-                    print(f"✅ VICTIM RAW TX: {victim_tx_hex[:24]}... (from eth_getRawTransactionByHash)")
-                else:
-                    # Fallback: use transaction hash for builders that accept it
-                    victim_tx_hex = tx_hash
-                    print(f"⚠️  VICTIM FALLBACK: {victim_tx_hex[:24]}... (using hash - may fail on Beaverbuild)")
-            else:
-                # If provider doesn't support raw requests, use hash
+                try:
+                    raw_response = w3.provider.make_request("eth_getRawTransactionByHash", [tx_hash])
+                    if raw_response.get("result"):
+                        victim_tx_hex = raw_response["result"]
+                        print(f"✅ VICTIM RAW TX (METHOD 1): {victim_tx_hex[:24]}... length={len(victim_tx_hex)}")
+                except Exception as e:
+                    print(f"⚠️  Method 1 failed: {e}")
+            
+            # Method 2: Try to reconstruct raw transaction from transaction object
+            if not victim_tx_hex or len(victim_tx_hex) < 100:
+                try:
+                    from eth_account import Account
+                    from eth_utils import to_hex
+                    
+                    # Get full transaction details
+                    full_tx = w3.eth.get_transaction(tx_hash)
+                    
+                    # Reconstruct the transaction dict for signing
+                    tx_dict = {
+                        'nonce': full_tx['nonce'],
+                        'gasPrice': full_tx.get('gasPrice'),
+                        'gas': full_tx['gas'],
+                        'to': full_tx['to'],
+                        'value': full_tx['value'],
+                        'data': full_tx['input'],
+                        'chainId': w3.eth.chain_id
+                    }
+                    
+                    # Handle EIP-1559 transactions
+                    if 'maxFeePerGas' in full_tx and full_tx['maxFeePerGas'] is not None:
+                        tx_dict['maxFeePerGas'] = full_tx['maxFeePerGas']
+                        tx_dict['maxPriorityFeePerGas'] = full_tx['maxPriorityFeePerGas']
+                        tx_dict['type'] = 2
+                        del tx_dict['gasPrice']  # Remove gasPrice for EIP-1559
+                    
+                    # Create a dummy signed transaction to get raw format
+                    # Note: This won't have the real signature, but shows the structure
+                    print(f"⚠️  METHOD 2: Attempting transaction reconstruction")
+                    print(f"   TX TYPE: {'EIP-1559' if 'maxFeePerGas' in tx_dict else 'Legacy'}")
+                    
+                except Exception as e:
+                    print(f"⚠️  Method 2 failed: {e}")
+            
+            # Method 3: Try eth_getTransactionByHash with additional params
+            if not victim_tx_hex or len(victim_tx_hex) < 100:
+                try:
+                    # Sometimes pending transactions have raw data in different fields
+                    full_tx_response = w3.provider.make_request("eth_getTransactionByHash", [tx_hash])
+                    if full_tx_response.get("result") and 'raw' in full_tx_response["result"]:
+                        victim_tx_hex = full_tx_response["result"]["raw"]
+                        print(f"✅ VICTIM RAW TX (METHOD 3): {victim_tx_hex[:24]}... length={len(victim_tx_hex)}")
+                except Exception as e:
+                    print(f"⚠️  Method 3 failed: {e}")
+            
+            # Final fallback: use transaction hash for builders that accept it
+            if not victim_tx_hex or len(victim_tx_hex) < 100:
                 victim_tx_hex = tx_hash
-                print(f"⚠️  VICTIM FALLBACK: {victim_tx_hex[:24]}... (provider limitation)")
+                print(f"⚠️  FINAL FALLBACK: {victim_tx_hex[:24]}... (using hash - Payload will skip)")
+                print(f"   LENGTH CHECK: {len(victim_tx_hex)} chars (Payload needs >200)")
+            else:
+                print(f"✅ RAW TX SUCCESS: {len(victim_tx_hex)} chars (Payload compatible: {len(victim_tx_hex) > 200})")
             
         except Exception as e:
             print(f"❌ Failed to get raw victim transaction: {e}")
-            print(f"⚠️  FALLBACK: Using transaction hash")
+            print(f"⚠️  EMERGENCY FALLBACK: Using transaction hash")
             victim_tx_hex = tx_hash
 
         # Scale trade amount with victim value for optimal profits
