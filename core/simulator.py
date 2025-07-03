@@ -120,18 +120,28 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             tx_hash = tx_hash.hex()
         print(f"\n💻 Analyzing tx: {tx_hash}")
         
-        # ✅ CRITICAL FIX: Get full victim transaction using standard eth_getTransactionByHash
+        # ✅ BEAVERBUILD FIX: Get full raw transaction data from blockchain
         try:
-            # Use the victim transaction data we already have
-            victim_tx_hex = tx_hash  # Use transaction hash directly for bundle
-            print(f"✅ VICTIM TX HASH: {victim_tx_hex[:24]}... (using transaction hash)")
+            # For pending transactions, try to get raw transaction data
+            if hasattr(w3.provider, 'make_request'):
+                # Use raw RPC call to get transaction with raw data
+                raw_response = w3.provider.make_request("eth_getRawTransactionByHash", [tx_hash])
+                if raw_response.get("result"):
+                    victim_tx_hex = raw_response["result"]
+                    print(f"✅ VICTIM RAW TX: {victim_tx_hex[:24]}... (from eth_getRawTransactionByHash)")
+                else:
+                    # Fallback: use transaction hash for builders that accept it
+                    victim_tx_hex = tx_hash
+                    print(f"⚠️  VICTIM FALLBACK: {victim_tx_hex[:24]}... (using hash - may fail on Beaverbuild)")
+            else:
+                # If provider doesn't support raw requests, use hash
+                victim_tx_hex = tx_hash
+                print(f"⚠️  VICTIM FALLBACK: {victim_tx_hex[:24]}... (provider limitation)")
             
-            # Alternatively, if we need full transaction data, reconstruct it
-            # For now, using hash is sufficient for Titan Builder bundles
         except Exception as e:
-            print(f"❌ Failed to process victim transaction: {e}")
-            print(f"⚠️  SKIPPING: Cannot process transaction {tx_hash}")
-            return
+            print(f"❌ Failed to get raw victim transaction: {e}")
+            print(f"⚠️  FALLBACK: Using transaction hash")
+            victim_tx_hex = tx_hash
 
         # Scale trade amount with victim value for optimal profits
         victim_value = victim_tx.get("value", 0)

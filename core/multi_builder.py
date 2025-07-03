@@ -71,9 +71,9 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
     try:
         timeout = aiohttp.ClientTimeout(total=3)  # 3 second timeout
         
-        # Special handling for Beaverbuild - ensure clean transaction format
+        # Special handling for Beaverbuild - ensure proper raw transaction format
         if builder_name == "beaverbuild":
-            # Validate that all transactions are properly hex-encoded
+            # Validate that all transactions are properly hex-encoded raw transactions
             txs = bundle_payload["params"][0]["txs"]
             for i, tx in enumerate(txs):
                 if not isinstance(tx, str) or not tx.startswith("0x"):
@@ -83,6 +83,15 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
                         "builder": builder_name,
                         "error": f"Invalid transaction format at index {i}"
                     }
+                # Check if transaction looks like raw transaction data (not just a hash)
+                if len(tx) < 100:  # Raw transactions are much longer than 66-char hashes
+                    print(f"❌ BEAVERBUILD: Transaction at index {i} appears to be hash, not raw tx: {tx[:24]}...")
+                    return {
+                        "success": False,
+                        "builder": builder_name,
+                        "error": f"Beaverbuild requires raw transaction data, not hash at index {i}"
+                    }
+            print(f"✅ BEAVERBUILD: All transactions validated as raw transaction data")
         
         async with aiohttp.ClientSession(timeout=timeout) as session:
             headers = {"Content-Type": "application/json"}
