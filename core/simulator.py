@@ -26,17 +26,23 @@ def calculate_sandwich_profit(w3, victim_tx, eth_amount):
         victim_to = victim_tx.get("to", "").lower()
         victim_value = victim_tx.get("value", 0)
         
-        # Skip if not enough ETH value or not targeting known DEX
-        if victim_value < w3.to_wei(0.05, "ether"):
+        # FIXED: Match the filter threshold (0.01 ETH, not 0.05)
+        if victim_value < w3.to_wei(0.01, "ether"):
             print(f"⛔ Victim tx value too low: {w3.from_wei(victim_value, 'ether')} ETH")
             return 0
+        
+        # FIXED: Ensure eth_amount is properly converted to wei
+        if isinstance(eth_amount, float):
+            eth_amount_wei = w3.to_wei(eth_amount, "ether")
+        else:
+            eth_amount_wei = eth_amount
         
         # For testing, assume WETH -> DAI path (we'll expand this later)
         DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F"
         path = [WETH_ADDRESS, DAI_ADDRESS]
         
         # Front-run: ETH -> Token (get tokens out)
-        front_amounts = router.functions.getAmountsOut(eth_amount, path).call()
+        front_amounts = router.functions.getAmountsOut(eth_amount_wei, path).call()
         tokens_received = front_amounts[1]
         
         # Back-run: Token -> ETH (sell tokens back)
@@ -45,13 +51,13 @@ def calculate_sandwich_profit(w3, victim_tx, eth_amount):
         eth_received = back_amounts[1]
         
         # Calculate gross profit
-        gross_profit_wei = eth_received - eth_amount
+        gross_profit_wei = eth_received - eth_amount_wei
         gross_profit_eth = w3.from_wei(gross_profit_wei, "ether")
         
         # Estimate gas costs (3 transactions * ~0.002 ETH each)
         gas_cost_eth = 0.006
         
-        # Net profit
+        # Net profitit
         net_profit_eth = gross_profit_eth - gas_cost_eth
         
         print(f"💰 Profit Analysis:")
