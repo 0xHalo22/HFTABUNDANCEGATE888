@@ -14,8 +14,8 @@ def is_valid_tx(tx):
 
     # 🚀 ENHANCED FILTERING - Your buddy's recommendations implemented!
     
-    # CRITICAL: Minimum victim value check (0.1 ETH threshold)
-    MIN_VICTIM_VALUE = 1e17  # 0.1 ETH in wei
+    # CRITICAL: Minimum victim value check (0.01 ETH threshold for high frequency)
+    MIN_VICTIM_VALUE = 1e16  # 0.01 ETH in wei (10x more opportunities!)
     if value < MIN_VICTIM_VALUE and value > 0:
         print(f"  ❌ VICTIM TOO SMALL: {value / 1e18:.6f} ETH < 0.1 ETH minimum")
         return False
@@ -73,7 +73,12 @@ def is_valid_tx(tx):
         "0x3328f7f4a1d1c57c35df56bbf0c9dcafca309c49",  # Tokenlon Router
         "0x92be6adb6a12da0ca607f9d87db2f9978cd6ec3e",  # Tokenlon Router V2
         "0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31",  # Airswap Router
-        "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"   # Ganache Test Router
+        "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",  # Ganache Test Router
+        
+        # 🚨 HIGH-VALUE UNKNOWN ADDRESSES (From Live Mempool Scanning)
+        "0x6aa9aa9af0c46bbc31680d8a393cef5163933cf2",  # Unknown: 1.945 ETH victim
+        "0x9a431c3da2879fbcb45e88e793c728da83cb065e",  # Unknown: 0.919 ETH victim
+        "0x982612345678901234567890123456789abcdef0",  # Placeholder for future unknowns
     }
     
     # 🚨 SECURITY: Log unknown addresses for investigation

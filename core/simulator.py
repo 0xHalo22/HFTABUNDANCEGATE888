@@ -6,6 +6,7 @@ from random import uniform
 from core.flashbots import send_bundle_to_titan
 from core.executor import Executor
 from core.swap_builder import build_swap_tx
+from core.profit_tracker import profit_tracker
 from web3 import Web3
 
 executor = Executor()
@@ -169,8 +170,16 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             tx_hash = tx_hash.hex()
         print(f"\n💻 Analyzing tx: {tx_hash}")
 
-        # Scale up trade amount for real profits
-        eth_to_send = w3.to_wei(0.001, "ether")  # 0.001 ETH for testing
+        # Scale trade amount with victim value for optimal profits
+        victim_value = victim_tx.get("value", 0)
+        if victim_value > 0:
+            # Scale: 10% of victim value, max 1 ETH, min 0.001 ETH
+            scaled_amount = min(max(victim_value * 0.1, w3.to_wei(0.001, "ether")), w3.to_wei(1.0, "ether"))
+        else:
+            scaled_amount = w3.to_wei(0.001, "ether")  # Default for zero-value txs
+        
+        eth_to_send = scaled_amount
+        print(f"🎯 TRADE SIZE: {w3.from_wei(eth_to_send, 'ether')} ETH (scaled with victim)"
         account = w3.eth.account.from_key(os.getenv("PRIVATE_KEY"))
 
         # Log wallet state
@@ -258,9 +267,17 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             print(f"⚡ AUTO-ESCALATION: Ramping bribe for next opportunity...")
             adjust_bribe_multiplier("Submitted")  # Always escalate for speed
 
-            # Estimate profit (scaled simulation)
-            estimated_profit = eth_to_send * 0.5  # Conservative 50% return estimate
-            print(f"📈 Estimated PnL: +{estimated_profit / 1e18:.6f} ETH")
+            # Calculate estimated profit based on victim slippage
+            victim_value = victim_tx.get("value", 0)
+            if victim_value > 0:
+                # Estimate 2-5% slippage capture based on victim size
+                slippage_rate = min(0.05, max(0.02, victim_value / 1e19))  # 2-5% based on size
+                estimated_profit = int(eth_to_send * slippage_rate)
+            else:
+                estimated_profit = int(eth_to_send * 0.01)  # 1% for zero-value txs
+            
+            actual_estimated_profit = estimated_profit  # Store for tracking
+            print(f"📈 Estimated PnL: +{actual_estimated_profit / 1e18:.6f} ETH")
             print(f"🔍 MONITORING: Will check block {target_block} for inclusion...")
 
             # Record the trade attempt with enhanced tracking
@@ -271,7 +288,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
                 "bundle_hash": bundle_hash,
                 "target_blocks": target_blocks,
                 "bribe_amount": coinbase_bribe / 1e18,
-                "estimated_profit": estimated_profit / 1e18,
+                "estimated_profit": actual_estimated_profit / 1e18,
                 "gas_used": 0.006,
                 "status": "submitted"
             }
@@ -290,9 +307,9 @@ async def simulate_sandwich_bundle(victim_tx, w3):
 
             # Add to pending monitoring list for inclusion checking
             print(f"🔍 MONITORING: Tracking bundle {bundle_hash[:16]}... for inclusion in blocks {target_blocks}")
-            print(f"💰 ESTIMATED TOTAL PROFIT: {estimated_profit / 1e18:.6f} ETH")
+            print(f"💰 ESTIMATED TOTAL PROFIT: {actual_estimated_profit / 1e18:.6f} ETH")
             print(f"🧮 BRIBE COST: {coinbase_bribe / 1e18:.6f} ETH")
-            print(f"📊 NET ESTIMATED: {(estimated_profit - coinbase_bribe) / 1e18:.6f} ETH")
+            print(f"📊 NET ESTIMATED: {(actual_estimated_profit - coinbase_bribe) / 1e18:.6f} ETH")
         else:
             error_reason = result.get("error", "Unknown error")
             print(f"❌ TITAN submission failed: {error_reason}")
