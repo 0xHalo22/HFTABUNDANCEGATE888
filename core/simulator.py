@@ -34,19 +34,20 @@ def calculate_dynamic_bribe(base_fee_wei, multiplier=None):
     return calculated
 
 def adjust_bribe_multiplier(bundle_result):
-    """AGGRESSIVE bribe adjustment - outbid everyone"""
+    """ULTRA-AGGRESSIVE bribe escalation - keep ramping until something hits"""
     global bribe_multiplier
 
-    if bundle_result in ["Underpriced", "ExcludedFromBlock", "Failed"]:
-        # MASSIVE escalation to crush competition
+    if bundle_result in ["Underpriced", "ExcludedFromBlock", "Failed", "Submitted"]:
+        # CONTINUOUS escalation - never stop ramping until inclusion
         old_multiplier = bribe_multiplier
-        bribe_multiplier = min(bribe_multiplier + 2.0, 25.0)  # Faster escalation, higher cap
-        print(f"🔥 ALPHA ESCALATION: {old_multiplier:.1f}x → {bribe_multiplier:.1f}x (CRUSHING COMPETITION)")
+        bribe_multiplier = min(bribe_multiplier + 3.0, 50.0)  # MASSIVE jumps, higher ceiling
+        print(f"🚀 SPEED ESCALATION: {old_multiplier:.1f}x → {bribe_multiplier:.1f}x (RAMPING UNTIL HIT!)")
+        print(f"💸 Next bribe will be ~{bribe_multiplier * 0.00032:.6f} ETH (UNSTOPPABLE)")
     elif bundle_result == "Included":
-        # Reduce but stay aggressive
-        if bribe_multiplier > 8.0:
-            print(f"💎 ALPHA RESET: {bribe_multiplier:.1f}x → 8.0x (MAINTAINING DOMINANCE)")
-            bribe_multiplier = 8.0
+        # Only slight reduction on success - keep pressure high
+        if bribe_multiplier > 15.0:
+            print(f"💎 PARTIAL RESET: {bribe_multiplier:.1f}x → 15.0x (STAYING AGGRESSIVE)")
+            bribe_multiplier = 15.0
 
 def time_until_next_block(w3, target_block):
     """Calculate optimal timing to land early in block slot"""
@@ -203,12 +204,13 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             base_fee = w3.eth.gas_price  # Fallback to gas price
 
         # Use ULTRA-ALPHA bribe calculation - CRUSH ALL COMPETITION
-        min_bribe = w3.to_wei(0.01, "ether")  # MASSIVE minimum floor - 10x higher!
+        min_bribe = w3.to_wei(0.015, "ether")  # EVEN HIGHER minimum floor!
         calculated_bribe = calculate_dynamic_bribe(base_fee)
         coinbase_bribe = max(calculated_bribe, min_bribe)
 
         print(f"🔥 CARPET BOMBING blocks {target_blocks} (current: {current_block})")
         print(f"⚡ ALPHA BRIBE: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
+        print(f"🚀 ESCALATION STATUS: Will ramp to {min(bribe_multiplier + 3.0, 50.0):.1f}x next (~{min(bribe_multiplier + 3.0, 50.0) * 0.00032:.6f} ETH)")
 
         # 🚀 ULTRA-AGGRESSIVE MULTI-RELAY BLITZ
         print(f"⚡ CARPET BOMB MODE: Submitting to MULTIPLE relays simultaneously!")
@@ -252,10 +254,9 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             bribe_info = f"Bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x), RefundPct: 90%"
             log_bundle_result(bundle_hash, "SUBMITTED", bribe_info)
 
-            # Track result for future bribe adjustments (simulated for now)
-            # In production, you'd check actual inclusion in next block
-            simulated_result = "Submitted"  # Will be "Included" or "ExcludedFromBlock" in real scenario
-            adjust_bribe_multiplier(simulated_result)
+            # SPEED STRATEGY: Auto-escalate after every submission to keep ramping
+            print(f"⚡ AUTO-ESCALATION: Ramping bribe for next opportunity...")
+            adjust_bribe_multiplier("Submitted")  # Always escalate for speed
 
             # Estimate profit (scaled simulation)
             estimated_profit = eth_to_send * 0.5  # Conservative 50% return estimate
