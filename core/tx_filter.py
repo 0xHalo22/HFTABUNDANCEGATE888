@@ -32,6 +32,7 @@ def is_valid_tx(tx):
         # 🟢 1inch Aggregator (High Volume)
         "0x1111111254eeb25477b68fb85ed929f73a960582",  # 1inch V5 Router
         "0x1111111254fb6c44bac0bed2854e76f90643097d",  # 1inch V4 Router
+        "0x111111125421ca6dc452d289314280a0f8842a65",  # 1inch V3 Router
         
         # 🟢 Paraswap (Popular Aggregator)
         "0xdef171fe48cf0115b1d80b88dc8eab59176fee57",  # Paraswap V5 Augustus
@@ -48,6 +49,18 @@ def is_valid_tx(tx):
         
         # 🟢 Kyber Network
         "0x6131b5fae19ea4f9d964eac0408e4408b66337b5",  # Kyber Router
+        
+        # 🟢 Additional Popular DEX Routers
+        "0x881d40237659c251811cec9c364ef91dc08d300c",  # Metamask Swap Router
+        "0x1111111254760f7ab3f16433eea9304126dcd199",  # 1inch V6 Router
+        "0x9008d19f58aabd9ed0d60971565aa8510560ab41",  # CoW Protocol GPv2
+        "0x74de5d4fcbf63e00296fd95d33236b9794016631",  # Matcha/0x Router
+        "0x11111112542d85b3ef69ae05771c2dccff4faa26",  # 1inch Limit Order Protocol
+        "0x1111111254fb6c44bac0bed2854e76f90643097d",  # 1inch V4 Router (backup)
+        "0x3328f7f4a1d1c57c35df56bbf0c9dcafca309c49",  # Tokenlon Router
+        "0x92be6adb6a12da0ca607f9d87db2f9978cd6ec3e",  # Tokenlon Router V2
+        "0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31",  # Airswap Router
+        "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"   # Ganache Test Router
     }
     
     # 🚨 SECURITY: Log unknown addresses for investigation
