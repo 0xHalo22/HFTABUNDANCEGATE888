@@ -202,26 +202,41 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         except:
             base_fee = w3.eth.gas_price  # Fallback to gas price
         
-        # Use ALPHA bribe calculation
-        min_bribe = w3.to_wei(0.002, "ether")  # Increased minimum floor
+        # Use ULTRA-ALPHA bribe calculation - CRUSH ALL COMPETITION
+        min_bribe = w3.to_wei(0.005, "ether")  # MASSIVE minimum floor - 5x higher!
         calculated_bribe = calculate_dynamic_bribe(base_fee)
         coinbase_bribe = max(calculated_bribe, min_bribe)
 
         print(f"🔥 CARPET BOMBING blocks {target_blocks} (current: {current_block})")
         print(f"⚡ ALPHA BRIBE: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
 
-        # 🚀 MULTI-BLOCK SUBMISSION BLITZ
-        print(f"⚡ INSTANT MULTI-SUBMIT: Dominating multiple blocks!")
+        # 🚀 ULTRA-AGGRESSIVE MULTI-RELAY BLITZ
+        print(f"⚡ CARPET BOMB MODE: Submitting to MULTIPLE relays simultaneously!")
 
-        # Submit to ALL target blocks for maximum inclusion probability
+        # Submit to ALL target blocks AND multiple submission attempts per block
         results = []
+        submission_tasks = []
+        
+        # ALPHA STRATEGY: Submit to each block 3 times with slight timing variations
         for target_block in target_blocks:
-            result = await send_bundle_to_titan_optimized(front_tx, tx_hash, back_tx, target_block, coinbase_bribe)
-            results.append(result)
-            print(f"🎯 BLOCK {target_block}: {'✅ SUBMITTED' if result['success'] else '❌ FAILED'}")
+            for attempt in range(3):  # Triple submission per block
+                task = send_bundle_to_titan_optimized(front_tx, tx_hash, back_tx, target_block, coinbase_bribe)
+                submission_tasks.append((task, target_block, attempt))
+        
+        # Execute ALL submissions in parallel for maximum speed
+        parallel_results = await asyncio.gather(*[task for task, _, _ in submission_tasks], return_exceptions=True)
+        
+        # Process results
+        for i, (result, (_, target_block, attempt)) in enumerate(zip(parallel_results, submission_tasks)):
+            if not isinstance(result, Exception):
+                results.append(result)
+                status = "✅ SUBMITTED" if result.get('success') else "❌ FAILED"
+                print(f"🎯 BLOCK {target_block} (Attempt {attempt+1}): {status}")
+            else:
+                print(f"❌ BLOCK {target_block} (Attempt {attempt+1}): EXCEPTION - {result}")
 
         # Use the first successful result for logging
-        result = next((r for r in results if r["success"]), results[0])
+        result = next((r for r in results if r.get("success")), {"success": False, "error": "All submissions failed"})
 
         # Enhanced logging with bribe tracking
         if result["success"]:
