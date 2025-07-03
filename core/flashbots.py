@@ -2,7 +2,7 @@
 import requests
 from web3 import Web3
 
-TITAN_URL = "https://rpc.titanbuilder.xyz"
+TITAN_URL = "https://rpc.titanbuilder.xyz/"
 
 def send_bundle_to_titan(front_tx_hex, victim_tx_hash, back_tx_hex, target_block):
     try:

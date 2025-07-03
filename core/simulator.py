@@ -77,7 +77,7 @@ async def wait_until_block_open(w3, target_block):
         current_block = w3.eth.block_number
     print(f"⏰ Block {target_block} opened - submitting bundle NOW!")
 
-async def send_bundle_to_titan_optimized(front_tx, victim_tx, back_tx, target_block, coinbase_bribe):
+async def send_bundle_to_titan_optimized(front_tx, victim_tx_hex, back_tx, target_block, coinbase_bribe):
     """Enhanced Titan Builder submission with refundPercent and coinbase bribe"""
     try:
         # Prepare bundle with coinbase bribe in back-run transaction
@@ -86,7 +86,7 @@ async def send_bundle_to_titan_optimized(front_tx, victim_tx, back_tx, target_bl
             "id": 1,
             "method": "eth_sendBundle",
             "params": [{
-                "txs": [front_tx, victim_tx, back_tx],
+                "txs": [front_tx, victim_tx_hex, back_tx],
                 "blockNumber": hex(target_block),
                 "refundPercent": 90,  # Your buddy's suggestion
                 "coinbaseBribe": hex(coinbase_bribe)  # Direct validator bribe
@@ -169,6 +169,14 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         if isinstance(tx_hash, bytes):
             tx_hash = tx_hash.hex()
         print(f"\n💻 Analyzing tx: {tx_hash}")
+        
+        # ✅ CRITICAL FIX: Get full victim transaction HEX (not just hash!)
+        try:
+            victim_tx_hex = w3.to_hex(w3.eth.get_raw_transaction(tx_hash))
+            print(f"✅ VICTIM TX HEX: {victim_tx_hex[:24]}... (full transaction data)")
+        except Exception as e:
+            print(f"❌ Failed to get victim transaction hex: {e}")
+            return
 
         # Scale trade amount with victim value for optimal profits
         victim_value = victim_tx.get("value", 0)
@@ -231,7 +239,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         # ALPHA STRATEGY: Submit to each block 3 times with slight timing variations
         for target_block in target_blocks:
             for attempt in range(3):  # Triple submission per block
-                task = send_bundle_to_titan_optimized(front_tx, tx_hash, back_tx, target_block, coinbase_bribe)
+                task = send_bundle_to_titan_optimized(front_tx, victim_tx_hex, back_tx, target_block, coinbase_bribe)
                 submission_tasks.append((task, target_block, attempt))
 
         # Execute ALL submissions in parallel for maximum speed
