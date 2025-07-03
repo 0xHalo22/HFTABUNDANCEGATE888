@@ -120,11 +120,11 @@ def calculate_sandwich_profit(w3, victim_tx, eth_amount):
             print(f"⛔ Victim tx value too low: {w3.from_wei(victim_value, 'ether')} ETH")
             return 0
 
-        # FIXED: Ensure eth_amount is properly converted to wei
+        # CRITICAL FIX: Ensure eth_amount is properly converted to wei (integer)
         if isinstance(eth_amount, float):
-            eth_amount_wei = w3.to_wei(eth_amount, "ether")
+            eth_amount_wei = int(w3.to_wei(eth_amount, "ether"))
         else:
-            eth_amount_wei = eth_amount
+            eth_amount_wei = int(eth_amount)
 
         # For testing, assume WETH -> DAI path (we'll expand this later)
         DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F"
@@ -150,7 +150,7 @@ def calculate_sandwich_profit(w3, victim_tx, eth_amount):
         net_profit_eth = gross_profit_eth - gas_cost_eth
 
         print(f"💰 Profit Analysis:")
-        print(f"  📤 Front-run: {w3.from_wei(eth_amount, 'ether')} ETH -> {tokens_received:,.0f} tokens")
+        print(f"  📤 Front-run: {w3.from_wei(eth_amount_wei, 'ether')} ETH -> {tokens_received:,.0f} tokens")
         print(f"  📥 Back-run: {tokens_received:,.0f} tokens -> {w3.from_wei(eth_received, 'ether')} ETH")
         print(f"  💵 Gross profit: {gross_profit_eth:.6f} ETH")
         print(f"  ⛽ Gas cost: {gas_cost_eth:.6f} ETH")
