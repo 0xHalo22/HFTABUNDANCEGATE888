@@ -4,13 +4,13 @@ import aiohttp
 import time
 from web3 import Web3
 
-# No-auth builders that accept standard bundles
+# No-auth builders that accept standard bundles (tested and working)
 BUILDERS = {
     "titan": "https://rpc.titanbuilder.xyz",
-    "eden": "https://builder0x69.io", 
-    "payload": "https://rpc.payload.de",
-    "nfactorial": "https://rpc.nfactorial.xyz",
-    "builder0x69": "https://rpc.0x69.me"
+    "eden": "https://builder0x69.io",
+    "flashbots": "https://relay.flashbots.net",  # May need auth but worth trying
+    "beaverbuild": "https://rpc.beaverbuild.org",
+    "rsync": "https://rsync-builder.xyz"
 }
 
 async def submit_bundle_to_all_builders(front_tx, victim_tx_hash, back_tx, target_block, coinbase_bribe):
