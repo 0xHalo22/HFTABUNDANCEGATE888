@@ -28,6 +28,26 @@ def is_valid_tx(tx):
         # 🟢 SushiSwap Routers (Official Verified List)
         "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",  # SushiSwap Router V1 (Legacy)
         "0x1b02da8cb0d097eb8d57a175b88c7d8b47997506",  # SushiSwap Router V2
+        
+        # 🟢 1inch Aggregator (High Volume)
+        "0x1111111254eeb25477b68fb85ed929f73a960582",  # 1inch V5 Router
+        "0x1111111254fb6c44bac0bed2854e76f90643097d",  # 1inch V4 Router
+        
+        # 🟢 Paraswap (Popular Aggregator)
+        "0xdef171fe48cf0115b1d80b88dc8eab59176fee57",  # Paraswap V5 Augustus
+        "0x216b4b4ba9f3e719726886d34a177484278bfcae",  # Paraswap V4
+        
+        # 🟢 Curve Finance
+        "0x99a58482bd75cbab83b27ec03ca68ff489b5788f",  # Curve Router
+        
+        # 🟢 Balancer V2
+        "0xba12222222228d8ba445958a75a0704d566bf2c8",  # Balancer Vault
+        
+        # 🟢 0x Protocol
+        "0xdef1c0ded9bec7f1a1670819833240f027b25eff",  # 0x Exchange Proxy
+        
+        # 🟢 Kyber Network
+        "0x6131b5fae19ea4f9d964eac0408e4408b66337b5",  # Kyber Router
     }
     
     # 🚨 SECURITY: Log unknown addresses for investigation
