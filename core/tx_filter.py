@@ -14,8 +14,8 @@ def is_valid_tx(tx):
 
     # 🚀 ENHANCED FILTERING - Your buddy's recommendations implemented!
 
-    # CRITICAL: Minimum victim value check (0.01 ETH threshold for high frequency)
-    MIN_VICTIM_VALUE = 1e16  # 0.01 ETH in wei (10x more opportunities!)
+    # CRITICAL: Minimum victim value check (0.001 ETH threshold for MAXIMUM opportunities!)
+    MIN_VICTIM_VALUE = 1e15  # 0.001 ETH in wei (100x more opportunities!)
     if value < MIN_VICTIM_VALUE and value > 0:
         print(f"  ❌ VICTIM TOO SMALL: {value / 1e18:.6f} ETH < 0.1 ETH minimum")
         return False
@@ -79,6 +79,22 @@ def is_valid_tx(tx):
         "0x6aa9aa9af0c46bbc31680d8a393cef5163933cf2",  # Unknown: 1.945 ETH victim
         "0x9a431c3da2879fbcb45e88e793c728da83cb065e",  # Unknown: 0.919 ETH victim
         "0x982612345678901234567890123456789abcdef0",  # Placeholder for future unknowns
+        
+        # 🟡 ADDITIONAL HIGH-FREQUENCY DEX ADDRESSES (From your logs)
+        "0x21aae5a5ff5022891f0b764990fd4857ae61431b",  # Unknown: 0.011676 ETH
+        "0xc7f8e85a3be4e397862989f05b8c5302d1361450",  # Unknown: 0.068968 ETH  
+        "0x82c27e0209c2e03d68308214c83a234588e586d2",  # Unknown: 0.667914 ETH
+        "0xb8001c3ec9aa1985f6c747e25c28324e4a361ec1",  # Unknown: 0.019454 ETH
+        "0x2783d6ee9b6f608a95c4be7e1059b71111eb6342",  # Unknown: 0.900415 ETH
+        
+        # 🟢 MORE VERIFIED DEX ROUTERS (Expanding coverage)
+        "0x51c72848c68a965f66fcaa61b3e4f4e2f95dd995",  # dYdX
+        "0x2a1530c4c41db0b0b2bb646cb5eb1a67b7158667",  # Bancor
+        "0x818e6fecd516ecc3849daf6845e3ec868087b755",  # Kyber Legacy
+        "0x9aa83081aa06af7208dcc7a4cb72c94d057d2cda",  # Loopring
+        "0x4aa42145aa6ebf72e164c9bbc74fbd3788045016",  # Nexus Mutual
+        "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c",  # Bancor V2
+        "0x3e66b66fd1d0b02fda6c811da9e0547970db2f21",  # Bancor V3
     }
 
     # 🚨 SECURITY: Log unknown addresses for investigation

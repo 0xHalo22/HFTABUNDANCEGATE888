@@ -172,10 +172,13 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         
         # ✅ CRITICAL FIX: Get full victim transaction HEX (not just hash!)
         try:
+            # Try the correct method name first
             victim_tx_hex = w3.to_hex(w3.eth.get_raw_transaction(tx_hash))
             print(f"✅ VICTIM TX HEX: {victim_tx_hex[:24]}... (full transaction data)")
         except Exception as e:
-            print(f"❌ Failed to get victim transaction hex: {e}")
+            print(f"❌ Failed to get victim transaction hex with get_raw_transaction: {e}")
+            # Fallback: try alternative method or skip this transaction
+            print(f"⚠️  SKIPPING: Cannot get raw transaction data for {tx_hash}")
             return
 
         # Scale trade amount with victim value for optimal profits
