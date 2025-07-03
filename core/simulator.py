@@ -19,12 +19,48 @@ def load_router_abi():
     with open("core/uniswap_v2_router_abi.json", "r") as f:
         return json.load(f)
 
-def calculate_bribe(base_fee_wei):
-    """Calculate dynamic coinbase bribe based on base fee"""
-    multiplier = uniform(1.5, 3.0)
+# Global bribe multiplier for adaptive escalation
+bribe_multiplier = 2.0
+
+def calculate_dynamic_bribe(base_fee_wei, multiplier=None):
+    """Calculate dynamic coinbase bribe with adaptive escalation"""
+    global bribe_multiplier
+    
+    if multiplier is None:
+        multiplier = bribe_multiplier
+    
     calculated = int(base_fee_wei * multiplier)
-    print(f"🧮 BRIBE CALC: base_fee={base_fee_wei}, multiplier={multiplier:.1f}, result={calculated}")
+    print(f"🧮 BRIBE CALC: base_fee={base_fee_wei}, multiplier={multiplier:.1f}x, result={calculated}")
     return calculated
+
+def adjust_bribe_multiplier(bundle_result):
+    """Adjust bribe multiplier based on bundle inclusion results"""
+    global bribe_multiplier
+    
+    if bundle_result in ["Underpriced", "ExcludedFromBlock", "Failed"]:
+        # Escalate bribe for next attempt
+        old_multiplier = bribe_multiplier
+        bribe_multiplier = min(bribe_multiplier + 0.2, 5.0)  # Cap at 5.0x
+        print(f"📈 BRIBE ESCALATION: {old_multiplier:.1f}x → {bribe_multiplier:.1f}x")
+    elif bundle_result == "Included":
+        # Reset to baseline on success
+        if bribe_multiplier > 2.0:
+            print(f"📉 BRIBE RESET: {bribe_multiplier:.1f}x → 2.0x")
+            bribe_multiplier = 2.0
+
+def time_until_next_block(w3, target_block):
+    """Calculate optimal timing to land early in block slot"""
+    try:
+        latest_block = w3.eth.get_block('latest')
+        estimated_block_time = 12  # Average Ethereum block time
+        time_passed = time.time() - latest_block["timestamp"]
+        sleep_time = max(0, estimated_block_time - time_passed)
+        
+        print(f"⏰ TIMING: {time_passed:.1f}s since last block, sleeping {min(sleep_time, 1.5):.1f}s")
+        return min(sleep_time, 1.5)  # Cap sleep to avoid missing next block
+    except Exception as e:
+        print(f"❌ Timing calculation failed: {e}")
+        return 0.5  # Default minimal sleep
 
 def log_bundle_result(bundle_hash, status, message):
     """Enhanced logging for bundle results"""
@@ -160,36 +196,47 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         current_block = w3.eth.block_number
         target_block = current_block + 1
 
-        # Calculate dynamic coinbase bribe with minimum floor
+        # Calculate adaptive dynamic coinbase bribe
         try:
             base_fee = w3.eth.get_block("pending")["baseFeePerGas"]
         except:
             base_fee = w3.eth.gas_price  # Fallback to gas price
         
-        # Ensure minimum bribe even with low base fees
-        min_bribe = w3.to_wei(0.001, "ether")  # 0.001 ETH minimum
-        calculated_bribe = calculate_bribe(base_fee)
+        # Use adaptive bribe calculation
+        min_bribe = w3.to_wei(0.001, "ether")  # 0.001 ETH minimum floor
+        calculated_bribe = calculate_dynamic_bribe(base_fee)
         coinbase_bribe = max(calculated_bribe, min_bribe)
 
         print(f"🎯 Targeting block {target_block} (current: {current_block})")
-        print(f"💸 Dynamic bribe: {coinbase_bribe / 1e18:.6f} ETH ({coinbase_bribe / base_fee:.1f}x base fee)")
+        print(f"💸 Adaptive bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
 
-        # Skip waiting - submit immediately for speed
-        print(f"🚀 IMMEDIATE SUBMISSION: No waiting for faster execution")
+        # Precision timing - sleep to land early in next block slot
+        sleep_time = time_until_next_block(w3, target_block)
+        if sleep_time > 0:
+            await asyncio.sleep(sleep_time)
+            print(f"🚀 PRECISION SUBMIT: Timed for early slot position")
 
         # Submit to Titan Builder with enhanced payload
         result = await send_bundle_to_titan_optimized(front_tx, tx_hash, back_tx, target_block, coinbase_bribe)
 
-        # Enhanced logging
+        # Enhanced logging with bribe tracking
         if result["success"]:
             bundle_hash = result.get("bundleHash", "unknown")
             print(f"✅ TITAN OPTIMIZED: Bundle submitted successfully")
             print(f"📦 Bundle Hash: {bundle_hash}")
             print(f"🎯 Target Block: {target_block}")
-            print(f"💸 Coinbase Bribe: {coinbase_bribe / 1e18:.6f} ETH")
+            print(f"🧮 Bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
             print(f"🔄 Refund Percent: 90%")
+            print(f"📊 Status: Submitted")
 
-            log_bundle_result(bundle_hash, "SUBMITTED", f"Bribe: {coinbase_bribe / 1e18:.6f} ETH, RefundPct: 90%")
+            # Log with detailed bribe info
+            bribe_info = f"Bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x), RefundPct: 90%"
+            log_bundle_result(bundle_hash, "SUBMITTED", bribe_info)
+            
+            # Track result for future bribe adjustments (simulated for now)
+            # In production, you'd check actual inclusion in next block
+            simulated_result = "Submitted"  # Will be "Included" or "ExcludedFromBlock" in real scenario
+            adjust_bribe_multiplier(simulated_result)
 
             # Estimate profit (scaled simulation)
             estimated_profit = eth_to_send * 0.5  # Conservative 50% return estimate
@@ -207,7 +254,11 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         else:
             error_reason = result.get("error", "Unknown error")
             print(f"❌ TITAN submission failed: {error_reason}")
+            print(f"📊 Status: Failed")
             log_bundle_result("unknown", "FAILED", error_reason)
+            
+            # Escalate bribe for next attempt on failure
+            adjust_bribe_multiplier("Failed")
 
     except Exception as e:
         print(f"❌ Exception in sandwich simulation: {e}")

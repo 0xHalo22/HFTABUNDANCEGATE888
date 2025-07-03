@@ -23,37 +23,39 @@ def build_swap_tx(w3, eth_amount, nonce_offset=0, coinbase_bribe=0):
     current_nonce = w3.eth.get_transaction_count(ACCOUNT.address, "pending")
     nonce = current_nonce + nonce_offset
 
-    # Get current gas price
+    # Get current gas price and base fee
     gas_price = w3.eth.gas_price
-
-    # ✅ Calculate competitive priority fee (20% above base fee)
     latest_block = w3.eth.get_block("latest")
-    base_fee = latest_block.get("baseFeePerGas", 0)
-    priority_fee = int(base_fee * 0.2)  # 20% tip
+    base_fee = latest_block.get("baseFeePerGas", gas_price)
 
-    print(f"⛽ Bidding {priority_fee / 1e9:.1f} gwei (20% above base)")
+    # ✅ Calculate competitive priority fee (25% above base fee for better inclusion)
+    priority_fee = int(base_fee * 1.25)  # Increased from 20% to 25%
+    print(f"⛽ Bidding {priority_fee / 1e9:.1f} gwei (25% above base)")
 
     # If coinbase bribe is specified, create a simple ETH transfer to coinbase
     if coinbase_bribe > 0:
-        print(f"💸 Adding coinbase bribe: {coinbase_bribe / 1e18:.6f} ETH")
+        bribe_multiplier = coinbase_bribe / base_fee if base_fee > 0 else 2.0
+        print(f"💸 Coinbase bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
 
-        # Get current coinbase address
-        coinbase_address = w3.eth.get_block("latest")["miner"]
+        # Get current coinbase address (validator)
+        coinbase_address = latest_block["miner"]
+        print(f"🎯 Validator: {coinbase_address}")
 
-        # Create simple ETH transfer transaction to coinbase
+        # Create optimized ETH transfer transaction to coinbase
         tx = {
             "to": coinbase_address,
             "value": coinbase_bribe,
             "gas": 21000,  # Standard ETH transfer gas
-            "gasPrice": priority_fee,
+            "gasPrice": priority_fee,  # Use same competitive gas price
             "nonce": nonce,
-            "chainId": 1
+            "chainId": w3.eth.chain_id
         }
 
         # Sign the transaction
         signed_tx = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
-        print(f"✅ [COINBASE BRIBE] Returning hex: {signed_tx.raw_transaction.hex()[:12]} {type(signed_tx.raw_transaction.hex())}")
-        return signed_tx.raw_transaction.hex()
+        hex_result = signed_tx.raw_transaction.hex()
+        print(f"✅ [COINBASE BRIBE] Built: {hex_result[:12]}... (nonce: {nonce})")
+        return hex_result
 
     router = w3.eth.contract(address=UNISWAP_ROUTER, abi=load_abi())
 
