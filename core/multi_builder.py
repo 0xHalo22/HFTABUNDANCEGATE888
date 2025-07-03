@@ -71,6 +71,19 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
     try:
         timeout = aiohttp.ClientTimeout(total=3)  # 3 second timeout
         
+        # Special handling for Beaverbuild - ensure clean transaction format
+        if builder_name == "beaverbuild":
+            # Validate that all transactions are properly hex-encoded
+            txs = bundle_payload["params"][0]["txs"]
+            for i, tx in enumerate(txs):
+                if not isinstance(tx, str) or not tx.startswith("0x"):
+                    print(f"❌ BEAVERBUILD: Invalid tx format at index {i}: {type(tx)}")
+                    return {
+                        "success": False,
+                        "builder": builder_name,
+                        "error": f"Invalid transaction format at index {i}"
+                    }
+        
         async with aiohttp.ClientSession(timeout=timeout) as session:
             headers = {"Content-Type": "application/json"}
             

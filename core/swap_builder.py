@@ -68,10 +68,11 @@ def build_swap_tx(w3, eth_amount, nonce_offset=0, coinbase_bribe=0):
 
     # Build transaction with unique nonce
     base_nonce = w3.eth.get_transaction_count(ACCOUNT.address)
-    # Bid 20% above current gas price for better inclusion
-    base_gas_price = w3.eth.gas_price
-    gas_price = int(base_gas_price * 1.2)
-    print(f"⛽ Bidding {w3.from_wei(gas_price, 'gwei'):.1f} gwei (20% above base)")
+    
+    # Use EIP-1559 format for better builder compatibility
+    latest_block = w3.eth.get_block('latest')
+    base_fee = latest_block.get('baseFeePerGas', w3.eth.gas_price)
+    
     tx = router.functions.swapExactETHForTokens(
         min_out,
         path,
@@ -81,10 +82,14 @@ def build_swap_tx(w3, eth_amount, nonce_offset=0, coinbase_bribe=0):
         "from": ACCOUNT.address,
         "value": eth_amount,
         "gas": 250000,
-        "gasPrice": gas_price,
+        "maxFeePerGas": base_fee * 2,  # EIP-1559 format
+        "maxPriorityFeePerGas": w3.to_wei(2, 'gwei'),  # Standard priority fee
         "nonce": base_nonce + nonce_offset,
-        "chainId": w3.eth.chain_id
+        "chainId": w3.eth.chain_id,
+        "type": 2  # EIP-1559 transaction type
     })
+    
+    print(f"⛽ EIP-1559: MaxFee={w3.from_wei(tx['maxFeePerGas'], 'gwei'):.1f} gwei, Priority=2 gwei")
 
     # Sign transaction
     signed_tx = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
