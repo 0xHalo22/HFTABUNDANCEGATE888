@@ -28,9 +28,9 @@ def build_swap_tx(w3, eth_amount, nonce_offset=0, coinbase_bribe=0):
     latest_block = w3.eth.get_block("latest")
     base_fee = latest_block.get("baseFeePerGas", gas_price)
 
-    # ✅ Calculate competitive priority fee (25% above base fee for better inclusion)
-    priority_fee = int(base_fee * 1.25)  # Increased from 20% to 25%
-    print(f"⛽ Bidding {priority_fee / 1e9:.1f} gwei (25% above base)")
+    # 🔥 ULTRA-AGGRESSIVE priority fee (300% above base fee for DOMINANCE)
+    priority_fee = int(base_fee * 4.0)  # 300% above base = INSTANT INCLUSION
+    print(f"⚡ ALPHA GAS: {priority_fee / 1e9:.1f} gwei (300% above base) - UNSTOPPABLE!")
 
     # If coinbase bribe is specified, create a simple ETH transfer to coinbase
     if coinbase_bribe > 0:

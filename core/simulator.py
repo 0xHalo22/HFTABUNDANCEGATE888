@@ -13,40 +13,40 @@ executor = Executor()
 # Constants for profit calculation
 WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 UNISWAP_ROUTER = "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a"
-MIN_PROFIT_THRESHOLD = 0.00005  # Minimum net profit in ETH (lowered for aggressive testing)
+MIN_PROFIT_THRESHOLD = 0.00001  # Ultra-low threshold - grab EVERYTHING profitable
 
 def load_router_abi():
     with open("core/uniswap_v2_router_abi.json", "r") as f:
         return json.load(f)
 
-# Global bribe multiplier for adaptive escalation
-bribe_multiplier = 2.0
+# Global bribe multiplier for ULTRA-AGGRESSIVE escalation
+bribe_multiplier = 8.0  # Start HIGH to beat competition immediately
 
 def calculate_dynamic_bribe(base_fee_wei, multiplier=None):
-    """Calculate dynamic coinbase bribe with adaptive escalation"""
+    """Calculate ULTRA-AGGRESSIVE coinbase bribe to dominate other MEV bots"""
     global bribe_multiplier
     
     if multiplier is None:
         multiplier = bribe_multiplier
     
     calculated = int(base_fee_wei * multiplier)
-    print(f"🧮 BRIBE CALC: base_fee={base_fee_wei}, multiplier={multiplier:.1f}x, result={calculated}")
+    print(f"⚡ ALPHA BRIBE: base_fee={base_fee_wei}, DOMINATION_MULTIPLIER={multiplier:.1f}x, result={calculated}")
     return calculated
 
 def adjust_bribe_multiplier(bundle_result):
-    """Adjust bribe multiplier based on bundle inclusion results"""
+    """AGGRESSIVE bribe adjustment - outbid everyone"""
     global bribe_multiplier
     
     if bundle_result in ["Underpriced", "ExcludedFromBlock", "Failed"]:
-        # Escalate bribe for next attempt
+        # MASSIVE escalation to crush competition
         old_multiplier = bribe_multiplier
-        bribe_multiplier = min(bribe_multiplier + 0.2, 5.0)  # Cap at 5.0x
-        print(f"📈 BRIBE ESCALATION: {old_multiplier:.1f}x → {bribe_multiplier:.1f}x")
+        bribe_multiplier = min(bribe_multiplier + 1.0, 20.0)  # Cap at 20x for safety
+        print(f"🔥 ALPHA ESCALATION: {old_multiplier:.1f}x → {bribe_multiplier:.1f}x (CRUSHING COMPETITION)")
     elif bundle_result == "Included":
-        # Reset to baseline on success
-        if bribe_multiplier > 2.0:
-            print(f"📉 BRIBE RESET: {bribe_multiplier:.1f}x → 2.0x")
-            bribe_multiplier = 2.0
+        # Reduce but stay aggressive
+        if bribe_multiplier > 8.0:
+            print(f"💎 ALPHA RESET: {bribe_multiplier:.1f}x → 8.0x (MAINTAINING DOMINANCE)")
+            bribe_multiplier = 8.0
 
 def time_until_next_block(w3, target_block):
     """Calculate optimal timing to land early in block slot"""
@@ -192,32 +192,36 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             print("❌ One or more txs are not hex strings!")
             return
 
-        # Get current block and calculate coinbase bribe
+        # 🚀 CARPET BOMB STRATEGY: Submit to multiple blocks
         current_block = w3.eth.block_number
-        target_block = current_block + 1
+        target_blocks = [current_block + 1, current_block + 2, current_block + 3]  # Multi-block attack
 
-        # Calculate adaptive dynamic coinbase bribe
+        # Calculate ULTRA-AGGRESSIVE dynamic coinbase bribe
         try:
             base_fee = w3.eth.get_block("pending")["baseFeePerGas"]
         except:
             base_fee = w3.eth.gas_price  # Fallback to gas price
         
-        # Use adaptive bribe calculation
-        min_bribe = w3.to_wei(0.001, "ether")  # 0.001 ETH minimum floor
+        # Use ALPHA bribe calculation
+        min_bribe = w3.to_wei(0.002, "ether")  # Increased minimum floor
         calculated_bribe = calculate_dynamic_bribe(base_fee)
         coinbase_bribe = max(calculated_bribe, min_bribe)
 
-        print(f"🎯 Targeting block {target_block} (current: {current_block})")
-        print(f"💸 Adaptive bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
+        print(f"🔥 CARPET BOMBING blocks {target_blocks} (current: {current_block})")
+        print(f"⚡ ALPHA BRIBE: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
 
-        # Precision timing - sleep to land early in next block slot
-        sleep_time = time_until_next_block(w3, target_block)
-        if sleep_time > 0:
-            await asyncio.sleep(sleep_time)
-            print(f"🚀 PRECISION SUBMIT: Timed for early slot position")
+        # 🚀 MULTI-BLOCK SUBMISSION BLITZ
+        print(f"⚡ INSTANT MULTI-SUBMIT: Dominating multiple blocks!")
 
-        # Submit to Titan Builder with enhanced payload
-        result = await send_bundle_to_titan_optimized(front_tx, tx_hash, back_tx, target_block, coinbase_bribe)
+        # Submit to ALL target blocks for maximum inclusion probability
+        results = []
+        for target_block in target_blocks:
+            result = await send_bundle_to_titan_optimized(front_tx, tx_hash, back_tx, target_block, coinbase_bribe)
+            results.append(result)
+            print(f"🎯 BLOCK {target_block}: {'✅ SUBMITTED' if result['success'] else '❌ FAILED'}")
+
+        # Use the first successful result for logging
+        result = next((r for r in results if r["success"]), results[0])
 
         # Enhanced logging with bribe tracking
         if result["success"]:
