@@ -1,5 +1,6 @@
 
 import os
+import json
 from core.flashbots import send_bundle_to_titan
 from core.executor import Executor
 from core.swap_builder import build_swap_tx
@@ -7,20 +8,89 @@ from web3 import Web3
 
 executor = Executor()
 
+# Constants for profit calculation
+WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+UNISWAP_ROUTER = "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a"
+MIN_PROFIT_THRESHOLD = 0.0002  # Minimum net profit in ETH
+
+def load_router_abi():
+    with open("core/uniswap_v2_router_abi.json", "r") as f:
+        return json.load(f)
+
+def calculate_sandwich_profit(w3, victim_tx, eth_amount):
+    """Calculate real profit using getAmountsOut for sandwich opportunity"""
+    try:
+        router = w3.eth.contract(address=UNISWAP_ROUTER, abi=load_router_abi())
+        
+        # Get victim transaction details
+        victim_to = victim_tx.get("to", "").lower()
+        victim_value = victim_tx.get("value", 0)
+        
+        # Skip if not enough ETH value or not targeting known DEX
+        if victim_value < w3.to_wei(0.05, "ether"):
+            print(f"⛔ Victim tx value too low: {w3.from_wei(victim_value, 'ether')} ETH")
+            return 0
+        
+        # For testing, assume WETH -> DAI path (we'll expand this later)
+        DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+        path = [WETH_ADDRESS, DAI_ADDRESS]
+        
+        # Front-run: ETH -> Token (get tokens out)
+        front_amounts = router.functions.getAmountsOut(eth_amount, path).call()
+        tokens_received = front_amounts[1]
+        
+        # Back-run: Token -> ETH (sell tokens back)
+        back_path = [DAI_ADDRESS, WETH_ADDRESS]
+        back_amounts = router.functions.getAmountsOut(tokens_received, back_path).call()
+        eth_received = back_amounts[1]
+        
+        # Calculate gross profit
+        gross_profit_wei = eth_received - eth_amount
+        gross_profit_eth = w3.from_wei(gross_profit_wei, "ether")
+        
+        # Estimate gas costs (3 transactions * ~0.002 ETH each)
+        gas_cost_eth = 0.006
+        
+        # Net profit
+        net_profit_eth = gross_profit_eth - gas_cost_eth
+        
+        print(f"💰 Profit Analysis:")
+        print(f"  📤 Front-run: {w3.from_wei(eth_amount, 'ether')} ETH -> {tokens_received:,.0f} tokens")
+        print(f"  📥 Back-run: {tokens_received:,.0f} tokens -> {w3.from_wei(eth_received, 'ether')} ETH")
+        print(f"  💵 Gross profit: {gross_profit_eth:.6f} ETH")
+        print(f"  ⛽ Gas cost: {gas_cost_eth:.6f} ETH")
+        print(f"  💎 Net profit: {net_profit_eth:.6f} ETH")
+        
+        return net_profit_eth
+        
+    except Exception as e:
+        print(f"❌ Error calculating sandwich profit: {e}")
+        return 0
+
 async def simulate_sandwich_bundle(victim_tx, w3):
     try:
         # Get victim tx hash safely
         tx_hash = victim_tx["hash"]
         if isinstance(tx_hash, bytes):
             tx_hash = tx_hash.hex()
-        print(f"\n💻 Handling tx: {tx_hash}")
+        print(f"\n💻 Analyzing tx: {tx_hash}")
 
-        eth_to_send = w3.to_wei(0.001, "ether")
+        # Use smaller test amount while validating
+        eth_to_send = w3.to_wei(0.0001, "ether")  # Very small for testing
         account = w3.eth.account.from_key(os.getenv("PRIVATE_KEY"))
 
         # Log wallet state
         balance = w3.eth.get_balance(account.address)
         print(f"💰 Wallet balance: {w3.from_wei(balance, 'ether')} ETH")
+
+        # ✅ CRITICAL: Calculate real profitability before building bundle
+        net_profit = calculate_sandwich_profit(w3, victim_tx, eth_to_send)
+        
+        if net_profit < MIN_PROFIT_THRESHOLD:
+            print(f"⛔ Skipping unprofitable sandwich. Net profit: {net_profit:.6f} ETH < {MIN_PROFIT_THRESHOLD} ETH threshold")
+            return
+        
+        print(f"✅ Profitable opportunity detected! Net profit: {net_profit:.6f} ETH")
 
         # Build front-run and back-run txs with different nonces
         front_tx = build_swap_tx(w3, eth_to_send, nonce_offset=0)
@@ -42,25 +112,27 @@ async def simulate_sandwich_bundle(victim_tx, w3):
 
         print(f"🎯 Targeting block {target_block} (current: {current_block})")
 
-        # Submit bundle to Titan
-        result = send_bundle_to_titan(front_tx, tx_hash, back_tx, target_block)
-
-        if not result.get("success"):
-            print(f"❌ Titan bundle submission failed:\n{result}")
+        # Submit bundle to multiple builders for higher inclusion rate
+        from core.multi_builder import submit_to_multiple_builders
+        
+        results = await submit_to_multiple_builders(front_tx, tx_hash, back_tx, target_block)
+        
+        # Check if at least one builder accepted the bundle
+        successful_submissions = [r for r in results.values() if r.get("success")]
+        
+        if not successful_submissions:
+            print(f"❌ All builder submissions failed:\n{results}")
             return
+        
+        print(f"✅ Bundle submitted to {len(successful_submissions)}/{len(results)} builders successfully!")
 
-        # Simulated profit calculation
-        gas_cost = 0.0005
-        estimated_profit = 0.001  # Simplified for now
-        net_profit = estimated_profit - gas_cost
-
-        print(f"📈 Estimated PnL: +{net_profit:.5f} ETH (gross: {estimated_profit:.5f}, gas: {gas_cost:.5f})")
+        print(f"📈 Real Estimated PnL: +{net_profit:.6f} ETH")
 
         # Record trade
         tx_summary = {
             "token_address": victim_tx.get("to", "unknown"),
             "profit": round(net_profit, 8),
-            "gas_used": gas_cost,
+            "gas_used": 0.006,
             "status": "submitted"
         }
 
