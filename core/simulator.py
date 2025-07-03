@@ -20,7 +20,7 @@ def load_router_abi():
         return json.load(f)
 
 # Global bribe multiplier for ULTRA-AGGRESSIVE escalation
-bribe_multiplier = 8.0  # Start HIGH to beat competition immediately
+bribe_multiplier = 12.0  # INCREASED: Start even higher to dominate
 
 def calculate_dynamic_bribe(base_fee_wei, multiplier=None):
     """Calculate ULTRA-AGGRESSIVE coinbase bribe to dominate other MEV bots"""
@@ -40,7 +40,7 @@ def adjust_bribe_multiplier(bundle_result):
     if bundle_result in ["Underpriced", "ExcludedFromBlock", "Failed"]:
         # MASSIVE escalation to crush competition
         old_multiplier = bribe_multiplier
-        bribe_multiplier = min(bribe_multiplier + 1.0, 20.0)  # Cap at 20x for safety
+        bribe_multiplier = min(bribe_multiplier + 2.0, 25.0)  # Faster escalation, higher cap
         print(f"🔥 ALPHA ESCALATION: {old_multiplier:.1f}x → {bribe_multiplier:.1f}x (CRUSHING COMPETITION)")
     elif bundle_result == "Included":
         # Reduce but stay aggressive
@@ -203,7 +203,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             base_fee = w3.eth.gas_price  # Fallback to gas price
 
         # Use ULTRA-ALPHA bribe calculation - CRUSH ALL COMPETITION
-        min_bribe = w3.to_wei(0.005, "ether")  # MASSIVE minimum floor - 5x higher!
+        min_bribe = w3.to_wei(0.01, "ether")  # MASSIVE minimum floor - 10x higher!
         calculated_bribe = calculate_dynamic_bribe(base_fee)
         coinbase_bribe = max(calculated_bribe, min_bribe)
 
