@@ -122,16 +122,24 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             print(f"❌ Titan submission failed: {result}")
             return
         
+        bundle_hash = result.get("response", {}).get("result", {}).get("bundleHash", "unknown")
         print(f"✅ Bundle submitted to Titan Builder successfully!")
-
+        print(f"📦 Bundle Hash: {bundle_hash}")
+        print(f"🎯 Target Block: {target_block}")
         print(f"📈 Estimated PnL: +0.005 ETH (scaled with 10x trade size)")
+        
+        # Track bundle for inclusion monitoring
+        print(f"🔍 MONITORING: Will check block {target_block} for inclusion...")
 
-        # Record trade
+        # Record trade with bundle tracking
         tx_summary = {
             "token_address": victim_tx.get("to", "unknown"),
             "profit": 0.005,  # Scaled profit estimate for 10x trade size
             "gas_used": 0.006,
-            "status": "submitted"
+            "status": "submitted",
+            "bundle_hash": bundle_hash,
+            "target_block": target_block,
+            "victim_tx_hash": tx_hash
         }
 
         await executor.handle_profitable_trade(tx_summary)
