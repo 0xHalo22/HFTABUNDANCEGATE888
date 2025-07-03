@@ -179,7 +179,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             scaled_amount = w3.to_wei(0.001, "ether")  # Default for zero-value txs
         
         eth_to_send = scaled_amount
-        print(f"🎯 TRADE SIZE: {w3.from_wei(eth_to_send, 'ether')} ETH (scaled with victim)"
+        print(f"🎯 TRADE SIZE: {w3.from_wei(eth_to_send, 'ether')} ETH (scaled with victim)")
         account = w3.eth.account.from_key(os.getenv("PRIVATE_KEY"))
 
         # Log wallet state

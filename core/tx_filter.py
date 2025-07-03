@@ -13,19 +13,19 @@ def is_valid_tx(tx):
     print(f"  ⛽ Gas Price: {gas_price / 1e9:.1f} gwei")
 
     # 🚀 ENHANCED FILTERING - Your buddy's recommendations implemented!
-    
+
     # CRITICAL: Minimum victim value check (0.01 ETH threshold for high frequency)
     MIN_VICTIM_VALUE = 1e16  # 0.01 ETH in wei (10x more opportunities!)
     if value < MIN_VICTIM_VALUE and value > 0:
         print(f"  ❌ VICTIM TOO SMALL: {value / 1e18:.6f} ETH < 0.1 ETH minimum")
         return False
-    
+
     # Gas price sanity check - avoid transactions with extremely low gas
     MIN_GAS_PRICE = 1e8  # 0.1 gwei minimum
     if gas_price < MIN_GAS_PRICE:
         print(f"  ❌ GAS TOO LOW: {gas_price / 1e9:.1f} gwei < 0.1 gwei minimum")
         return False
-    
+
     print(f"  ✅ VICTIM QUALIFIES: {value / 1e18:.6f} ETH value, {gas_price / 1e9:.1f} gwei gas")
 
     # Filter 1: OFFICIAL VERIFIED DEX ROUTERS ONLY (From Security Audit)
@@ -37,32 +37,32 @@ def is_valid_tx(tx):
         "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",  # Uniswap V3 Router 2 (Multicall & complex routing)
         "0xef1c6e67703c7bd7107eed8303fbe6ec2554bf6b",  # Uniswap Universal Router (Next-gen)
         "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad",  # Universal Router V2 (ETH & Base)
-        
+
         # 🟢 SushiSwap Routers (Official Verified List)
         "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",  # SushiSwap Router V1 (Legacy)
         "0x1b02da8cb0d097eb8d57a175b88c7d8b47997506",  # SushiSwap Router V2
-        
+
         # 🟢 1inch Aggregator (High Volume)
         "0x1111111254eeb25477b68fb85ed929f73a960582",  # 1inch V5 Router
         "0x1111111254fb6c44bac0bed2854e76f90643097d",  # 1inch V4 Router
         "0x111111125421ca6dc452d289314280a0f8842a65",  # 1inch V3 Router
-        
+
         # 🟢 Paraswap (Popular Aggregator)
         "0xdef171fe48cf0115b1d80b88dc8eab59176fee57",  # Paraswap V5 Augustus
         "0x216b4b4ba9f3e719726886d34a177484278bfcae",  # Paraswap V4
-        
+
         # 🟢 Curve Finance
         "0x99a58482bd75cbab83b27ec03ca68ff489b5788f",  # Curve Router
-        
+
         # 🟢 Balancer V2
         "0xba12222222228d8ba445958a75a0704d566bf2c8",  # Balancer Vault
-        
+
         # 🟢 0x Protocol
         "0xdef1c0ded9bec7f1a1670819833240f027b25eff",  # 0x Exchange Proxy
-        
+
         # 🟢 Kyber Network
         "0x6131b5fae19ea4f9d964eac0408e4408b66337b5",  # Kyber Router
-        
+
         # 🟢 Additional Popular DEX Routers
         "0x881d40237659c251811cec9c364ef91dc08d300c",  # Metamask Swap Router
         "0x1111111254760f7ab3f16433eea9304126dcd199",  # 1inch V6 Router
@@ -74,13 +74,13 @@ def is_valid_tx(tx):
         "0x92be6adb6a12da0ca607f9d87db2f9978cd6ec3e",  # Tokenlon Router V2
         "0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31",  # Airswap Router
         "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1",  # Ganache Test Router
-        
+
         # 🚨 HIGH-VALUE UNKNOWN ADDRESSES (From Live Mempool Scanning)
         "0x6aa9aa9af0c46bbc31680d8a393cef5163933cf2",  # Unknown: 1.945 ETH victim
         "0x9a431c3da2879fbcb45e88e793c728da83cb065e",  # Unknown: 0.919 ETH victim
         "0x982612345678901234567890123456789abcdef0",  # Placeholder for future unknowns
     }
-    
+
     # 🚨 SECURITY: Log unknown addresses for investigation
     if to_address not in known_dex_addresses and value > 0:
         print(f"  🚨 UNKNOWN ADDRESS DETECTED: {to_address}")
