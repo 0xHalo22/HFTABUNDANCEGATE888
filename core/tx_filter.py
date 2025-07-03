@@ -102,6 +102,13 @@ def is_valid_tx(tx):
         print(f"  🚨 UNKNOWN ADDRESS DETECTED: {to_address}")
         print(f"     💰 Value: {value / 1e18:.6f} ETH - INVESTIGATE BEFORE ADDING!")
         print(f"     📝 Add to investigation log for manual review")
+        
+        # 🎯 BYPASS: Allow high-value unknown addresses (experimental)
+        HIGH_VALUE_THRESHOLD = 5e16  # 0.05 ETH threshold for bypass
+        if value >= HIGH_VALUE_THRESHOLD:
+            print(f"  🚀 HIGH-VALUE BYPASS: {value / 1e18:.6f} ETH >= 0.05 ETH - ALLOWING!")
+            print(f"  ⚠️  EXPERIMENTAL: Treating as potential DEX for testing")
+            return True
 
     if to_address not in known_dex_addresses:
         print(f"  ❌ SKIP: Not a known DEX address")
