@@ -2,11 +2,16 @@ import asyncio
 from core.simulator import simulate_sandwich_bundle
 from core.tx_filter import is_valid_tx
 from core.profit_tracker import profit_tracker
+from core.inclusion_monitor import initialize_monitor, get_inclusion_monitor
 
 async def listen_for_swaps(w3):
     print("🚨 Starting ETH-only HFT sniper live...")
     print("🔌 Connecting to WebSocket provider...")
     print("🔍 Listening for new pending transactions...")
+    
+    # Initialize inclusion monitoring
+    monitor = initialize_monitor(w3)
+    print("🔍 Inclusion monitoring system activated!")
 
     tx_filter = w3.eth.filter("pending")
     
@@ -35,6 +40,12 @@ async def listen_for_swaps(w3):
                         
                         # Print live profit tracking stats
                         profit_tracker.print_live_stats()
+                        
+                        # Check for bundle inclusions
+                        monitor = get_inclusion_monitor()
+                        if monitor:
+                            await monitor.check_inclusions()
+                            monitor.print_live_stats()
 
                 except Exception as e:
                     print(f"❌ Error fetching tx data: {e}")

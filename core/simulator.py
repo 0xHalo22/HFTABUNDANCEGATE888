@@ -7,6 +7,7 @@ from core.flashbots import send_bundle_to_titan
 from core.executor import Executor
 from core.swap_builder import build_swap_tx
 from core.profit_tracker import profit_tracker
+from core.inclusion_monitor import get_inclusion_monitor
 from web3 import Web3
 
 executor = Executor()
@@ -267,7 +268,17 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             # Record bribe payment
             profit_tracker.record_bribe_payment(coinbase_bribe / 1e18)
 
-            # Add to pending monitoring list for inclusion checking
+            # Add to inclusion monitoring system
+            monitor = get_inclusion_monitor()
+            if monitor:
+                monitor.track_bundle(
+                    bundle_hash=bundle_hash,
+                    target_blocks=target_blocks,
+                    victim_tx_hash=tx_hash,
+                    bribe_amount=coinbase_bribe / 1e18,
+                    estimated_profit=actual_estimated_profit / 1e18
+                )
+            
             print(f"🔍 MONITORING: Tracking bundle {bundle_hash[:16]}... for inclusion in blocks {target_blocks}")
             print(f"💰 ESTIMATED TOTAL PROFIT: {actual_estimated_profit / 1e18:.6f} ETH")
             print(f"🧮 BRIBE COST: {coinbase_bribe / 1e18:.6f} ETH")
