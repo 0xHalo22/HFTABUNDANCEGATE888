@@ -187,11 +187,11 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         victim_value = victim_tx.get("value", 0)
         if victim_value > 0:
             # Scale: 10% of victim value, max 1 ETH, min 0.001 ETH
-            scaled_amount = min(max(victim_value * 0.1, w3.to_wei(0.001, "ether")), w3.to_wei(1.0, "ether"))
+            scaled_amount = min(max(int(victim_value * 0.1), w3.to_wei(0.001, "ether")), w3.to_wei(1.0, "ether"))
         else:
             scaled_amount = w3.to_wei(0.001, "ether")  # Default for zero-value txs
         
-        eth_to_send = scaled_amount
+        eth_to_send = int(scaled_amount)
         print(f"🎯 TRADE SIZE: {w3.from_wei(eth_to_send, 'ether')} ETH (scaled with victim)")
         account = w3.eth.account.from_key(os.getenv("PRIVATE_KEY"))
 
@@ -199,8 +199,8 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         balance = w3.eth.get_balance(account.address)
         print(f"💰 Wallet balance: {w3.from_wei(balance, 'ether')} ETH")
 
-        # ✅ SPEED OPTIMIZATION: Skip simulation - trust our filters!
-        print(f"🚀 FAST EXECUTION: Bypassing simulation for speed - filters confirmed viability")
+        # ✅ SPEED OPTIMIZATION: Skip profit calculation for now - focus on execution
+        print(f"🚀 FAST EXECUTION: Bypassing profit calculation for speed - trust filters!")
 
         # Build front-run and back-run txs with different nonces
         front_tx = build_swap_tx(w3, eth_to_send, nonce_offset=0)
