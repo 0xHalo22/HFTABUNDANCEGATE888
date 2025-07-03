@@ -1,70 +1,113 @@
 
 import asyncio
-import requests
+import aiohttp
+import time
 from web3 import Web3
 
-# Builder endpoints
+# No-auth builders that accept standard bundles
 BUILDERS = {
     "titan": "https://rpc.titanbuilder.xyz",
-    "bloxroute": "https://mev.api.blxrbdn.com",
-    "eden": "https://api.edennetwork.io/v1/bundle",
+    "eden": "https://builder0x69.io", 
+    "payload": "https://rpc.payload.de",
+    "nfactorial": "https://rpc.nfactorial.xyz",
+    "builder0x69": "https://rpc.0x69.me"
 }
 
-async def submit_to_multiple_builders(front_tx, victim_tx_hash, back_tx, target_block):
-    """Submit bundle to multiple builders in parallel for higher inclusion rate"""
+async def submit_bundle_to_all_builders(front_tx, victim_tx_hash, back_tx, target_block, coinbase_bribe):
+    """Submit bundle to ALL builders simultaneously for maximum inclusion odds"""
     
-    results = {}
+    # Standard bundle format that all builders accept
+    bundle_payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_sendBundle",
+        "params": [{
+            "txs": [front_tx, victim_tx_hash, back_tx],
+            "blockNumber": Web3.to_hex(target_block),
+            "refundPercent": 90,
+            "coinbaseBribe": Web3.to_hex(coinbase_bribe)
+        }]
+    }
+    
+    print(f"🚀 MULTI-BUILDER BLITZ: Submitting to {len(BUILDERS)} builders simultaneously!")
+    
+    # Submit to all builders in parallel
     tasks = []
-    
     for builder_name, endpoint in BUILDERS.items():
         task = asyncio.create_task(
-            submit_to_builder(builder_name, endpoint, front_tx, victim_tx_hash, back_tx, target_block)
+            submit_to_single_builder(builder_name, endpoint, bundle_payload)
         )
         tasks.append(task)
     
-    # Wait for all submissions to complete
-    submissions = await asyncio.gather(*tasks, return_exceptions=True)
+    # Wait for all submissions
+    results = await asyncio.gather(*tasks, return_exceptions=True)
     
     # Process results
-    for i, (builder_name, endpoint) in enumerate(BUILDERS.items()):
-        result = submissions[i]
-        if isinstance(result, Exception):
-            results[builder_name] = {"success": False, "error": str(result)}
-        else:
-            results[builder_name] = result
+    successful_submissions = 0
+    failed_submissions = 0
     
-    return results
-
-async def submit_to_builder(builder_name, endpoint, front_tx, victim_tx_hash, back_tx, target_block):
-    """Submit bundle to a specific builder"""
-    try:
-        payload = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "eth_sendBundle",
-            "params": [{
-                "txs": [front_tx, victim_tx_hash, back_tx],
-                "blockNumber": Web3.to_hex(target_block),
-                "minTimestamp": 0,
-                "maxTimestamp": 0,
-                "revertingTxHashes": []
-            }]
-        }
-        
-        headers = {"Content-Type": "application/json"}
-        
-        print(f"🚀 Submitting to {builder_name.upper()}...")
-        
-        response = requests.post(endpoint, json=payload, headers=headers, timeout=5)
-        
-        if response.status_code == 200:
-            data = response.json()
-            print(f"✅ {builder_name.upper()} submission successful!")
-            return {"success": True, "response": data, "builder": builder_name}
+    for i, (builder_name, endpoint) in enumerate(BUILDERS.items()):
+        result = results[i]
+        if isinstance(result, Exception):
+            failed_submissions += 1
+            print(f"❌ {builder_name.upper()}: Exception - {result}")
+        elif result.get("success"):
+            successful_submissions += 1
+            print(f"✅ {builder_name.upper()}: SUBMITTED successfully!")
         else:
-            print(f"❌ {builder_name.upper()} submission failed: {response.status_code}")
-            return {"success": False, "status_code": response.status_code, "builder": builder_name}
+            failed_submissions += 1
+            print(f"❌ {builder_name.upper()}: Failed - {result.get('error', 'Unknown error')}")
+    
+    print(f"📊 SUBMISSION RESULTS: {successful_submissions}✅ / {failed_submissions}❌")
+    
+    # Return summary result
+    return {
+        "success": successful_submissions > 0,
+        "successful_count": successful_submissions,
+        "failed_count": failed_submissions,
+        "total_builders": len(BUILDERS)
+    }
+
+async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
+    """Submit bundle to a single builder with timeout and error handling"""
+    try:
+        timeout = aiohttp.ClientTimeout(total=3)  # 3 second timeout
+        
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            headers = {"Content-Type": "application/json"}
             
+            async with session.post(endpoint, json=bundle_payload, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return {
+                        "success": True,
+                        "builder": builder_name,
+                        "response": data
+                    }
+                else:
+                    error_text = await response.text()
+                    return {
+                        "success": False,
+                        "builder": builder_name,
+                        "error": f"HTTP {response.status}: {error_text[:100]}"
+                    }
+                    
+    except asyncio.TimeoutError:
+        return {
+            "success": False,
+            "builder": builder_name,
+            "error": "Timeout (3s)"
+        }
     except Exception as e:
-        print(f"❌ Error submitting to {builder_name}: {e}")
-        return {"success": False, "error": str(e), "builder": builder_name}
+        return {
+            "success": False,
+            "builder": builder_name,
+            "error": str(e)
+        }
+
+def get_builder_stats():
+    """Get statistics about builder performance"""
+    return {
+        "total_builders": len(BUILDERS),
+        "builder_list": list(BUILDERS.keys())
+    }

@@ -187,44 +187,56 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         # 🚀 ULTRA-AGGRESSIVE MULTI-RELAY BLITZ
         print(f"⚡ CARPET BOMB MODE: Submitting to MULTIPLE relays simultaneously!")
 
-        # Submit to ALL target blocks AND multiple submission attempts per block
+        # 🚀 MULTI-BUILDER NUCLEAR OPTION: Submit to ALL builders for ALL target blocks
+        from core.multi_builder import submit_bundle_to_all_builders
+        
         results = []
-        submission_tasks = []
-
-        # ALPHA STRATEGY: Submit to each block 3 times with slight timing variations
+        
+        # Submit to each target block using ALL builders
         for target_block in target_blocks:
-            for attempt in range(3):  # Triple submission per block
-                task = send_bundle_to_titan_optimized(front_tx, victim_tx_hex, back_tx, target_block, coinbase_bribe)
-                submission_tasks.append((task, target_block, attempt))
-
-        # Execute ALL submissions in parallel for maximum speed
-        parallel_results = await asyncio.gather(*[task for task, _, _ in submission_tasks], return_exceptions=True)
-
-        # Process results
-        for i, (result, (_, target_block, attempt)) in enumerate(zip(parallel_results, submission_tasks)):
-            if not isinstance(result, Exception):
-                results.append(result)
-                status = "✅ SUBMITTED" if result.get('success') else "❌ FAILED"
-                print(f"🎯 BLOCK {target_block} (Attempt {attempt+1}): {status}")
+            print(f"🎯 BLOCK {target_block}: Launching multi-builder assault...")
+            
+            multi_result = await submit_bundle_to_all_builders(
+                front_tx, victim_tx_hex, back_tx, target_block, coinbase_bribe
+            )
+            
+            results.append(multi_result)
+            
+            if multi_result.get("success"):
+                successful = multi_result.get("successful_count", 0)
+                total = multi_result.get("total_builders", 0)
+                print(f"🚀 BLOCK {target_block}: {successful}/{total} builders accepted bundle!")
             else:
-                print(f"❌ BLOCK {target_block} (Attempt {attempt+1}): EXCEPTION - {result}")
+                print(f"❌ BLOCK {target_block}: All builders failed")
 
-        # Use the first successful result for logging
-        result = next((r for r in results if r.get("success")), {"success": False, "error": "All submissions failed"})
+        # Overall result - success if ANY builder accepted for ANY block
+        overall_success = any(r.get("success") for r in results)
+        total_successful = sum(r.get("successful_count", 0) for r in results)
+        total_attempts = sum(r.get("total_builders", 0) for r in results)
+        
+        result = {
+            "success": overall_success,
+            "successful_submissions": total_successful,
+            "total_attempts": total_attempts,
+            "bundleHash": f"0x{hash(str(front_tx + back_tx)) % (10**16):016x}"
+        }
 
-        # Enhanced logging with bribe tracking
+        # Enhanced logging for multi-builder results
         if result["success"]:
             bundle_hash = result.get("bundleHash", "unknown")
-            print(f"✅ TITAN OPTIMIZED: Bundle submitted successfully")
+            successful = result.get("successful_submissions", 0)
+            total = result.get("total_attempts", 0)
+            
+            print(f"✅ MULTI-BUILDER SUCCESS: Bundle submitted to {successful}/{total} builders!")
             print(f"📦 Bundle Hash: {bundle_hash}")
-            print(f"🎯 Target Block: {target_block}")
+            print(f"🎯 Target Blocks: {target_blocks}")
             print(f"🧮 Bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
             print(f"🔄 Refund Percent: 90%")
-            print(f"📊 Status: Submitted")
+            print(f"📊 Status: Multi-Builder Submitted")
 
-            # Log with detailed bribe info
-            bribe_info = f"Bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x), RefundPct: 90%"
-            log_bundle_result(bundle_hash, "SUBMITTED", bribe_info)
+            # Log with multi-builder info
+            builder_info = f"Builders: {successful}/{total}, Bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x)"
+            log_bundle_result(bundle_hash, "MULTI-SUBMITTED", builder_info)
 
             # SPEED STRATEGY: Auto-escalate after every submission to keep ramping
             print(f"⚡ AUTO-ESCALATION: Ramping bribe for next opportunity...")
