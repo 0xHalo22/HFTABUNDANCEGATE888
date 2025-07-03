@@ -72,12 +72,38 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
     try:
         timeout = aiohttp.ClientTimeout(total=3)  # 3 second timeout
         
+        # Create builder-specific payload variants
+        payload_to_send = bundle_payload.copy()
         
+        # Fix Payload builder - remove refundPercent and use different method
+        if builder_name == "payload":
+            payload_to_send = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "mev_sendBundle",  # Different method
+                "params": [{
+                    "txs": bundle_payload["params"][0]["txs"],
+                    "blockNumber": bundle_payload["params"][0]["blockNumber"]
+                    # Remove refundPercent - not supported
+                }]
+            }
+        
+        # Fix Nfactorial builder - use minimal format
+        elif builder_name == "nfactorial":
+            payload_to_send = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "eth_sendBundle",
+                "params": [
+                    bundle_payload["params"][0]["txs"],  # Direct array format
+                    bundle_payload["params"][0]["blockNumber"]
+                ]
+            }
         
         async with aiohttp.ClientSession(timeout=timeout) as session:
             headers = {"Content-Type": "application/json"}
             
-            async with session.post(endpoint, json=bundle_payload, headers=headers) as response:
+            async with session.post(endpoint, json=payload_to_send, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     return {
