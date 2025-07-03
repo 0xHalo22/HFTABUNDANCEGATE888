@@ -8,8 +8,7 @@ from web3 import Web3
 BUILDERS = {
     "titan": "https://rpc.titanbuilder.xyz",
     "eden": "https://builder0x69.io", 
-    "rsync": "https://rsync-builder.xyz",
-    "payload": "https://rpc.payload.de"
+    "rsync": "https://rsync-builder.xyz"
 }
 
 async def submit_bundle_to_all_builders(front_tx, victim_tx_hash, back_tx, target_block, coinbase_bribe):
@@ -74,38 +73,7 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
         # Create builder-specific payload variants
         payload_to_send = bundle_payload.copy()
         
-        # Fix Payload builder - ensure proper transaction format
-        if builder_name == "payload":
-            # Payload is very strict about transaction format
-            # Skip Payload if we don't have proper raw transaction data
-            txs = bundle_payload["params"][0]["txs"]
-            raw_txs = []
-            
-            for tx in txs:
-                # Only accept very long hex strings (actual raw transactions)
-                if isinstance(tx, str) and tx.startswith("0x") and len(tx) > 200:
-                    raw_txs.append(tx)
-                else:
-                    print(f"⚠️  PAYLOAD SKIP: tx {tx[:20]}... length={len(tx)} (need >200)")
-            
-            # Skip Payload if we don't have enough raw transactions
-            if len(raw_txs) < len(txs):
-                return {
-                    "success": False,
-                    "builder": builder_name,
-                    "error": "Missing raw transaction data - Payload requires raw txs"
-                }
-                    
-            payload_to_send = {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "eth_sendBundle",
-                "params": [{
-                    "txs": raw_txs,  # Only verified raw transaction data
-                    "blockNumber": bundle_payload["params"][0]["blockNumber"]
-                    # Remove refundPercent - not supported by Payload
-                }]
-            }
+        # All remaining builders use standard format
         
         
         
