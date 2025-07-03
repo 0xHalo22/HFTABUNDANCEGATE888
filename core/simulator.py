@@ -113,19 +113,16 @@ async def simulate_sandwich_bundle(victim_tx, w3):
 
         print(f"🎯 Targeting block {target_block} (current: {current_block})")
 
-        # Submit bundle to multiple builders for higher inclusion rate
-        from core.multi_builder import submit_to_multiple_builders
+        # Submit bundle to Titan Builder only for reliability
+        from core.flashbots import send_bundle_to_titan
         
-        results = await submit_to_multiple_builders(front_tx, tx_hash, back_tx, target_block)
+        result = send_bundle_to_titan(front_tx, tx_hash, back_tx, target_block)
         
-        # Check if at least one builder accepted the bundle
-        successful_submissions = [r for r in results.values() if r.get("success")]
-        
-        if not successful_submissions:
-            print(f"❌ All builder submissions failed:\n{results}")
+        if not result.get("success"):
+            print(f"❌ Titan submission failed: {result}")
             return
         
-        print(f"✅ Bundle submitted to {len(successful_submissions)}/{len(results)} builders successfully!")
+        print(f"✅ Bundle submitted to Titan Builder successfully!")
 
         print(f"📈 Estimated PnL: +0.0005 ETH (threshold-based)")
 
