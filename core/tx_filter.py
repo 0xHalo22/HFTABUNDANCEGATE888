@@ -6,10 +6,9 @@ def is_valid_tx(tx):
     to_address = tx.get('to', '').lower()
     value = tx.get('value', 0)
     
-    # Filter 1: Even lower minimum for testing (0.005 ETH = ~$20)
-    min_value_wei = 5000000000000000  # 0.005 ETH in wei (was 0.01)
+    # Filter 1: Very small minimum for testing (0.001 ETH = ~$4)
+    min_value_wei = 1000000000000000  # 0.001 ETH in wei
     if value < min_value_wei:
-        print(f"⛔ [FILTER] Low value tx: {value / 1e18:.6f} ETH < 0.005 ETH threshold")
         return False
     
     # Filter 2: Expanded DEX addresses (more inclusive)
@@ -31,15 +30,14 @@ def is_valid_tx(tx):
     }
     
     if to_address not in known_dex_addresses:
-        print(f"⛔ [FILTER] Not targeting known DEX: {to_address}")
         return False
     
     # Filter 3: Higher gas price tolerance (200 gwei instead of 100)
     gas_price = tx.get('gasPrice', 0)
     max_gas_price = 200000000000  # 200 gwei (was 100)
     if gas_price > max_gas_price:
-        print(f"⛔ [FILTER] Gas price too high: {gas_price / 1e9:.1f} gwei > 200 gwei")
         return False
     
-    print(f"✅ [FILTER] Valid opportunity: {tx_hash} -> {to_address} ({value / 1e18:.3f} ETH)")
+    # Only log when we find a valid opportunity
+    print(f"✅ VALID DEX TX: {tx_hash} -> {to_address} ({value / 1e18:.3f} ETH)")
     return True

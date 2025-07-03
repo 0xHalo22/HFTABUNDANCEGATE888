@@ -16,13 +16,10 @@ async def listen_for_swaps(w3):
             for tx_hash in pending_tx_hashes:
                 try:
                     tx = w3.eth.get_transaction(tx_hash)
-                    print(f"🔎 Scanning tx: {tx_hash.hex()}")
 
                     if is_valid_tx(tx):
-                        print("✅ Valid tx detected — sending to execution")
+                        print("🎯 Sending to execution pipeline...")
                         await simulate_sandwich_bundle(tx, w3)
-                    else:
-                        print("⛔️ Skipped tx")
 
                 except Exception as e:
                     print(f"❌ Error fetching tx data: {e}")
