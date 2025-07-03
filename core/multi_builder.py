@@ -7,10 +7,9 @@ from web3 import Web3
 # No-auth builders that accept standard bundles (tested and working)
 BUILDERS = {
     "titan": "https://rpc.titanbuilder.xyz",
-    "eden": "https://builder0x69.io",
-    "flashbots": "https://relay.flashbots.net",  # May need auth but worth trying
-    "beaverbuild": "https://rpc.beaverbuild.org",
-    "rsync": "https://rsync-builder.xyz"
+    "eden": "https://builder0x69.io", 
+    "rsync": "https://rsync-builder.xyz",
+    "beaverbuild": "https://rpc.beaverbuild.org"
 }
 
 async def submit_bundle_to_all_builders(front_tx, victim_tx_hash, back_tx, target_block, coinbase_bribe):
@@ -24,8 +23,7 @@ async def submit_bundle_to_all_builders(front_tx, victim_tx_hash, back_tx, targe
         "params": [{
             "txs": [front_tx, victim_tx_hash, back_tx],
             "blockNumber": Web3.to_hex(target_block),
-            "refundPercent": 90,
-            "coinbaseBribe": Web3.to_hex(coinbase_bribe)
+            "refundPercent": 90
         }]
     }
     
