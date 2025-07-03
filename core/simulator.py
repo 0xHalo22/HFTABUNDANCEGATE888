@@ -24,6 +24,21 @@ def load_router_abi():
 # Global bribe multiplier for ULTRA-AGGRESSIVE escalation
 bribe_multiplier = 12.0  # INCREASED: Start even higher to dominate
 
+def get_bribe_params(attempt, base_fee_wei):
+    """Calculate escalating bribes per attempt with precise EIP-1559 params"""
+    base_priority_fee = 2  # in gwei
+    multiplier = 1.5
+    
+    # Progressive escalation per attempt
+    priority_fee_gwei = base_priority_fee + attempt * multiplier
+    priority_fee_wei = int(priority_fee_gwei * 1e9)
+    
+    # Max fee = base fee + priority fee * 2 (EIP-1559 standard)
+    max_fee_wei = base_fee_wei + (priority_fee_wei * 2)
+    
+    print(f"⚡ ESCALATED BRIBE #{attempt}: Priority={priority_fee_gwei:.1f} gwei, MaxFee={max_fee_wei/1e9:.1f} gwei")
+    return priority_fee_wei, max_fee_wei
+
 def calculate_dynamic_bribe(base_fee_wei, multiplier=None):
     """Calculate ULTRA-AGGRESSIVE coinbase bribe to dominate other MEV bots"""
     global bribe_multiplier
@@ -226,39 +241,45 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             print("❌ One or more txs are not hex strings!")
             return
 
-        # 🚀 CARPET BOMB STRATEGY: Submit to multiple blocks
+        # 🚀 ADAPTIVE ESCALATION STRATEGY: Submit with increasing bribes per block
         current_block = w3.eth.block_number
         target_blocks = [current_block + 1, current_block + 2, current_block + 3]  # Multi-block attack
 
-        # Calculate ULTRA-AGGRESSIVE dynamic coinbase bribe
+        # Get base fee for EIP-1559 calculations
         try:
             base_fee = w3.eth.get_block("pending")["baseFeePerGas"]
         except:
             base_fee = w3.eth.gas_price  # Fallback to gas price
 
-        # Use ULTRA-ALPHA bribe calculation - CRUSH ALL COMPETITION
-        min_bribe = w3.to_wei(0.015, "ether")  # EVEN HIGHER minimum floor!
-        calculated_bribe = calculate_dynamic_bribe(base_fee)
-        coinbase_bribe = max(calculated_bribe, min_bribe)
+        print(f"🔥 ADAPTIVE CARPET BOMB: blocks {target_blocks} (current: {current_block})")
+        print(f"📊 Base Fee: {base_fee / 1e9:.1f} gwei - Escalating per block...")
 
-        print(f"🔥 CARPET BOMBING blocks {target_blocks} (current: {current_block})")
-        print(f"⚡ ALPHA BRIBE: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x base fee)")
-        print(f"🚀 ESCALATION STATUS: Will ramp to {min(bribe_multiplier + 3.0, 50.0):.1f}x next (~{min(bribe_multiplier + 3.0, 50.0) * 0.00032:.6f} ETH)")
-
-        # 🚀 ULTRA-AGGRESSIVE MULTI-RELAY BLITZ
-        print(f"⚡ CARPET BOMB MODE: Submitting to MULTIPLE relays simultaneously!")
-
-        # 🚀 MULTI-BUILDER NUCLEAR OPTION: Submit to ALL builders for ALL target blocks
-        from core.multi_builder import submit_bundle_to_all_builders
+        # 🚀 MULTI-BUILDER ADAPTIVE SUBMISSION
+        from core.multi_builder import submit_bundle_to_all_builders_adaptive
         
         results = []
         
-        # Submit to each target block using ALL builders
-        for target_block in target_blocks:
-            print(f"🎯 BLOCK {target_block}: Launching multi-builder assault...")
+        # Submit to each target block with escalating bribes
+        for i, target_block in enumerate(target_blocks):
+            attempt = i  # 0, 1, 2 for progressive escalation
             
-            multi_result = await submit_bundle_to_all_builders(
-                front_tx, victim_tx_hex, back_tx, target_block, coinbase_bribe
+            # Calculate escalated bribe parameters for this attempt
+            priority_fee_wei, max_fee_wei = get_bribe_params(attempt, base_fee)
+            
+            # Also calculate coinbase bribe (validator tip) - escalate this too
+            coinbase_multiplier = bribe_multiplier + (attempt * 5.0)  # 12x, 17x, 22x
+            coinbase_bribe = max(
+                int(base_fee * coinbase_multiplier),
+                w3.to_wei(0.015 + (attempt * 0.005), "ether")  # 0.015, 0.020, 0.025 ETH floor
+            )
+            
+            print(f"🎯 BLOCK {target_block} (attempt #{attempt}): Escalated assault...")
+            print(f"⚡ Titan bundle → Block {target_block} | Prio: {priority_fee_wei/1e9:.1f} gwei | MaxFee: {max_fee_wei/1e9:.1f} gwei")
+            print(f"💰 Coinbase Bribe: {coinbase_bribe/1e18:.6f} ETH ({coinbase_multiplier:.1f}x base fee)")
+            
+            multi_result = await submit_bundle_to_all_builders_adaptive(
+                front_tx, victim_tx_hex, back_tx, target_block, 
+                coinbase_bribe, priority_fee_wei, max_fee_wei
             )
             
             results.append(multi_result)
@@ -266,9 +287,16 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             if multi_result.get("success"):
                 successful = multi_result.get("successful_count", 0)
                 total = multi_result.get("total_builders", 0)
-                print(f"🚀 BLOCK {target_block}: {successful}/{total} builders accepted bundle!")
+                print(f"✅ BLOCK {target_block}: {successful}/{total} builders accepted escalated bundle!")
             else:
-                print(f"❌ BLOCK {target_block}: All builders failed")
+                print(f"❌ BLOCK {target_block}: All builders rejected escalated bundle")
+                # Log specific builder responses for debugging
+                if "builder_responses" in multi_result:
+                    for builder, response in multi_result["builder_responses"].items():
+                        if "error" in response:
+                            print(f"❌ {builder.upper()} rejected: {response['error']}")
+                        else:
+                            print(f"✅ {builder.upper()} accepted bundle.")
 
         # Overall result - success if ANY builder accepted for ANY block
         overall_success = any(r.get("success") for r in results)
