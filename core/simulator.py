@@ -13,7 +13,7 @@ executor = Executor()
 # Constants for profit calculation
 WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 UNISWAP_ROUTER = "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a"
-MIN_PROFIT_THRESHOLD = 0.0002  # Minimum net profit in ETH
+MIN_PROFIT_THRESHOLD = 0.00005  # Minimum net profit in ETH (lowered for aggressive testing)
 
 def load_router_abi():
     with open("core/uniswap_v2_router_abi.json", "r") as f:
