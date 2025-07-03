@@ -230,20 +230,11 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             print(f"⚡ AUTO-ESCALATION: Ramping bribe for next opportunity...")
             adjust_bribe_multiplier("Submitted")  # Always escalate for speed
 
-            # Calculate estimated profit based on victim slippage
-            victim_value = victim_tx.get("value", 0)
-            if victim_value > 0:
-                # Estimate 2-5% slippage capture based on victim size
-                slippage_rate = min(0.05, max(0.02, victim_value / 1e19))  # 2-5% based on size
-                estimated_profit = int(eth_to_send * slippage_rate)
-            else:
-                estimated_profit = int(eth_to_send * 0.01)  # 1% for zero-value txs
-            
-            actual_estimated_profit = estimated_profit  # Store for tracking
-            print(f"📈 Estimated PnL: +{actual_estimated_profit / 1e18:.6f} ETH")
+            # 🚀 SPEED MODE: Skip ALL profit calculations - focus on execution
+            print(f"🚀 SPEED MODE: Skipping profit estimation - trust filters + execution speed!")
             print(f"🔍 MONITORING: Will check block {target_block} for inclusion...")
 
-            # Record the trade attempt with enhanced tracking
+            # Minimal trade data for tracking (no profit calculations)
             trade_data = {
                 "timestamp": time.time(),
                 "tx_hash": tx_hash,
@@ -251,24 +242,24 @@ async def simulate_sandwich_bundle(victim_tx, w3):
                 "bundle_hash": bundle_hash,
                 "target_blocks": target_blocks,
                 "bribe_amount": coinbase_bribe / 1e18,
-                "estimated_profit": actual_estimated_profit / 1e18,
+                "estimated_profit": 0.0,  # Skip calculation
                 "gas_used": 0.006,
                 "status": "submitted"
             }
 
             await executor.handle_profitable_trade(trade_data)
 
-            # Record bundle submission for performance tracking
+            # Record bundle submission (minimal tracking)
             profit_tracker.record_bundle_submission(
                 bundle_hash=bundle_hash,
-                estimated_profit=actual_estimated_profit / 1e18,
+                estimated_profit=0.0,  # Skip calculation
                 bribe_amount=coinbase_bribe / 1e18
             )
 
             # Record bribe payment
             profit_tracker.record_bribe_payment(coinbase_bribe / 1e18)
 
-            # Add to inclusion monitoring system
+            # Add to inclusion monitoring (minimal data)
             monitor = get_inclusion_monitor()
             if monitor:
                 monitor.track_bundle(
@@ -276,13 +267,12 @@ async def simulate_sandwich_bundle(victim_tx, w3):
                     target_blocks=target_blocks,
                     victim_tx_hash=tx_hash,
                     bribe_amount=coinbase_bribe / 1e18,
-                    estimated_profit=actual_estimated_profit / 1e18
+                    estimated_profit=0.0  # Skip calculation
                 )
             
             print(f"🔍 MONITORING: Tracking bundle {bundle_hash[:16]}... for inclusion in blocks {target_blocks}")
-            print(f"💰 ESTIMATED TOTAL PROFIT: {actual_estimated_profit / 1e18:.6f} ETH")
             print(f"🧮 BRIBE COST: {coinbase_bribe / 1e18:.6f} ETH")
-            print(f"📊 NET ESTIMATED: {(actual_estimated_profit - coinbase_bribe) / 1e18:.6f} ETH")
+            print(f"🚀 STATUS: PURE SPEED MODE - calculations disabled!")
         else:
             error_reason = result.get("error", "Unknown error")
             print(f"❌ TITAN submission failed: {error_reason}")
