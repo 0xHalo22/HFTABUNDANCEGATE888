@@ -22,7 +22,9 @@ def load_router_abi():
 def calculate_bribe(base_fee_wei):
     """Calculate dynamic coinbase bribe based on base fee"""
     multiplier = uniform(1.5, 3.0)
-    return int(base_fee_wei * multiplier)
+    calculated = int(base_fee_wei * multiplier)
+    print(f"🧮 BRIBE CALC: base_fee={base_fee_wei}, multiplier={multiplier:.1f}, result={calculated}")
+    return calculated
 
 def log_bundle_result(bundle_hash, status, message):
     """Enhanced logging for bundle results"""
@@ -158,15 +160,22 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         current_block = w3.eth.block_number
         target_block = current_block + 1
 
-        # Calculate dynamic coinbase bribe based on your buddy's formula
-        base_fee = w3.eth.get_block("pending")["baseFeePerGas"]
-        coinbase_bribe = calculate_bribe(base_fee)
+        # Calculate dynamic coinbase bribe with minimum floor
+        try:
+            base_fee = w3.eth.get_block("pending")["baseFeePerGas"]
+        except:
+            base_fee = w3.eth.gas_price  # Fallback to gas price
+        
+        # Ensure minimum bribe even with low base fees
+        min_bribe = w3.to_wei(0.001, "ether")  # 0.001 ETH minimum
+        calculated_bribe = calculate_bribe(base_fee)
+        coinbase_bribe = max(calculated_bribe, min_bribe)
 
         print(f"🎯 Targeting block {target_block} (current: {current_block})")
         print(f"💸 Dynamic bribe: {coinbase_bribe / 1e18:.6f} ETH ({coinbase_bribe / base_fee:.1f}x base fee)")
 
-        # Wait for optimal timing - early in block slot
-        await wait_until_block_open(w3, target_block)
+        # Skip waiting - submit immediately for speed
+        print(f"🚀 IMMEDIATE SUBMISSION: No waiting for faster execution")
 
         # Submit to Titan Builder with enhanced payload
         result = await send_bundle_to_titan_optimized(front_tx, tx_hash, back_tx, target_block, coinbase_bribe)
