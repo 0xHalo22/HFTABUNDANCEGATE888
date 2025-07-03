@@ -74,14 +74,24 @@ async def submit_to_single_builder(builder_name, endpoint, bundle_payload):
         # Create builder-specific payload variants
         payload_to_send = bundle_payload.copy()
         
-        # Fix Payload builder - use standard eth_sendBundle with minimal params
+        # Fix Payload builder - ensure proper transaction format
         if builder_name == "payload":
+            # Payload needs the transactions array to contain ONLY raw transaction data
+            # Filter out any transaction hashes and keep only hex-encoded raw transactions
+            txs = bundle_payload["params"][0]["txs"]
+            filtered_txs = []
+            
+            for tx in txs:
+                # Keep only properly formatted raw transactions (long hex strings)
+                if isinstance(tx, str) and tx.startswith("0x") and len(tx) > 66:
+                    filtered_txs.append(tx)
+                    
             payload_to_send = {
                 "jsonrpc": "2.0",
                 "id": 1,
-                "method": "eth_sendBundle",  # Back to standard method
+                "method": "eth_sendBundle",
                 "params": [{
-                    "txs": bundle_payload["params"][0]["txs"],
+                    "txs": filtered_txs,  # Only raw transaction data
                     "blockNumber": bundle_payload["params"][0]["blockNumber"]
                     # Remove refundPercent - not supported by Payload
                 }]
