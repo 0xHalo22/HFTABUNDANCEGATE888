@@ -12,8 +12,21 @@ def is_valid_tx(tx):
     print(f"  💰 Value: {value / 1e18:.6f} ETH")
     print(f"  ⛽ Gas Price: {gas_price / 1e9:.1f} gwei")
 
-    # TESTING MODE: No value filter - any DEX transaction is profitable!
-    print(f"  🧪 TEST MODE: Skipping value checks - all DEX txs are fair game!")
+    # 🚀 ENHANCED FILTERING - Your buddy's recommendations implemented!
+    
+    # CRITICAL: Minimum victim value check (0.1 ETH threshold)
+    MIN_VICTIM_VALUE = 1e17  # 0.1 ETH in wei
+    if value < MIN_VICTIM_VALUE and value > 0:
+        print(f"  ❌ VICTIM TOO SMALL: {value / 1e18:.6f} ETH < 0.1 ETH minimum")
+        return False
+    
+    # Gas price sanity check - avoid transactions with extremely low gas
+    MIN_GAS_PRICE = 1e8  # 0.1 gwei minimum
+    if gas_price < MIN_GAS_PRICE:
+        print(f"  ❌ GAS TOO LOW: {gas_price / 1e9:.1f} gwei < 0.1 gwei minimum")
+        return False
+    
+    print(f"  ✅ VICTIM QUALIFIES: {value / 1e18:.6f} ETH value, {gas_price / 1e9:.1f} gwei gas")e fair game!")
 
     # Filter 1: OFFICIAL VERIFIED DEX ROUTERS ONLY (From Security Audit)
     known_dex_addresses = {

@@ -25,10 +25,10 @@ bribe_multiplier = 8.0  # Start HIGH to beat competition immediately
 def calculate_dynamic_bribe(base_fee_wei, multiplier=None):
     """Calculate ULTRA-AGGRESSIVE coinbase bribe to dominate other MEV bots"""
     global bribe_multiplier
-    
+
     if multiplier is None:
         multiplier = bribe_multiplier
-    
+
     calculated = int(base_fee_wei * multiplier)
     print(f"⚡ ALPHA BRIBE: base_fee={base_fee_wei}, DOMINATION_MULTIPLIER={multiplier:.1f}x, result={calculated}")
     return calculated
@@ -36,7 +36,7 @@ def calculate_dynamic_bribe(base_fee_wei, multiplier=None):
 def adjust_bribe_multiplier(bundle_result):
     """AGGRESSIVE bribe adjustment - outbid everyone"""
     global bribe_multiplier
-    
+
     if bundle_result in ["Underpriced", "ExcludedFromBlock", "Failed"]:
         # MASSIVE escalation to crush competition
         old_multiplier = bribe_multiplier
@@ -55,7 +55,7 @@ def time_until_next_block(w3, target_block):
         estimated_block_time = 12  # Average Ethereum block time
         time_passed = time.time() - latest_block["timestamp"]
         sleep_time = max(0, estimated_block_time - time_passed)
-        
+
         print(f"⏰ TIMING: {time_passed:.1f}s since last block, sleeping {min(sleep_time, 1.5):.1f}s")
         return min(sleep_time, 1.5)  # Cap sleep to avoid missing next block
     except Exception as e:
@@ -201,7 +201,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             base_fee = w3.eth.get_block("pending")["baseFeePerGas"]
         except:
             base_fee = w3.eth.gas_price  # Fallback to gas price
-        
+
         # Use ULTRA-ALPHA bribe calculation - CRUSH ALL COMPETITION
         min_bribe = w3.to_wei(0.005, "ether")  # MASSIVE minimum floor - 5x higher!
         calculated_bribe = calculate_dynamic_bribe(base_fee)
@@ -216,16 +216,16 @@ async def simulate_sandwich_bundle(victim_tx, w3):
         # Submit to ALL target blocks AND multiple submission attempts per block
         results = []
         submission_tasks = []
-        
+
         # ALPHA STRATEGY: Submit to each block 3 times with slight timing variations
         for target_block in target_blocks:
             for attempt in range(3):  # Triple submission per block
                 task = send_bundle_to_titan_optimized(front_tx, tx_hash, back_tx, target_block, coinbase_bribe)
                 submission_tasks.append((task, target_block, attempt))
-        
+
         # Execute ALL submissions in parallel for maximum speed
         parallel_results = await asyncio.gather(*[task for task, _, _ in submission_tasks], return_exceptions=True)
-        
+
         # Process results
         for i, (result, (_, target_block, attempt)) in enumerate(zip(parallel_results, submission_tasks)):
             if not isinstance(result, Exception):
@@ -251,7 +251,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             # Log with detailed bribe info
             bribe_info = f"Bribe: {coinbase_bribe / 1e18:.6f} ETH ({bribe_multiplier:.1f}x), RefundPct: 90%"
             log_bundle_result(bundle_hash, "SUBMITTED", bribe_info)
-            
+
             # Track result for future bribe adjustments (simulated for now)
             # In production, you'd check actual inclusion in next block
             simulated_result = "Submitted"  # Will be "Included" or "ExcludedFromBlock" in real scenario
@@ -274,9 +274,19 @@ async def simulate_sandwich_bundle(victim_tx, w3):
                 "gas_used": 0.006,
                 "status": "submitted"
             }
-            
+
             await executor.handle_profitable_trade(trade_data)
-            
+
+            # Record bundle submission for performance tracking
+            profit_tracker.record_bundle_submission(
+                bundle_hash=bundle_hash,
+                estimated_profit=actual_estimated_profit / 1e18,
+                bribe_amount=coinbase_bribe / 1e18
+            )
+
+            # Record bribe payment
+            profit_tracker.record_bribe_payment(coinbase_bribe / 1e18)
+
             # Add to pending monitoring list for inclusion checking
             print(f"🔍 MONITORING: Tracking bundle {bundle_hash[:16]}... for inclusion in blocks {target_blocks}")
             print(f"💰 ESTIMATED TOTAL PROFIT: {estimated_profit / 1e18:.6f} ETH")
@@ -287,7 +297,7 @@ async def simulate_sandwich_bundle(victim_tx, w3):
             print(f"❌ TITAN submission failed: {error_reason}")
             print(f"📊 Status: Failed")
             log_bundle_result("unknown", "FAILED", error_reason)
-            
+
             # Escalate bribe for next attempt on failure
             adjust_bribe_multiplier("Failed")
 

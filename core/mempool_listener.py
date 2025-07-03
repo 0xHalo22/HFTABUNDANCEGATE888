@@ -1,6 +1,7 @@
 import asyncio
 from core.simulator import simulate_sandwich_bundle
 from core.tx_filter import is_valid_tx
+from core.profit_tracker import profit_tracker
 
 async def listen_for_swaps(w3):
     print("🚨 Starting ETH-only HFT sniper live...")
@@ -30,7 +31,10 @@ async def listen_for_swaps(w3):
                     # Log stats every 100 transactions
                     if total_processed % 100 == 0:
                         success_rate = (valid_found / total_processed) * 100
-                        print(f"\n📊 SCANNING STATS: {valid_found}/{total_processed} valid ({success_rate:.2f}%)\n")
+                        print(f"\n📊 SCANNING STATS: {valid_found}/{total_processed} valid ({success_rate:.2f}%)")
+                        
+                        # Print live profit tracking stats
+                        profit_tracker.print_live_stats()
 
                 except Exception as e:
                     print(f"❌ Error fetching tx data: {e}")
