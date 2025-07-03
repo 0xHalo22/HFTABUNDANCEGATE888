@@ -1,0 +1,117 @@
+# 🧠 Agent Task: Optimize Ethereum MEV Bundle Execution for Titan Builder
+
+---
+
+## ✅ Objective:
+Fix bundle exclusion by improving bribes, timing, and logging. Focus 100% on Titan Builder only.
+
+---
+
+## 🔧 Modify the following files: `executor.py`, `swap_builder.py`, `bundle_builder.py`, and any shared utility/config as needed.
+
+---
+
+## 1. 💸 Add Dynamic Coinbase Bribe
+
+In the **back-run transaction**:
+- Add an ETH value transfer directly to `block.coinbase`
+- This is your validator bribe
+
+### Bribe Calculation:
+
+```python
+from random import uniform
+
+def calculate_bribe(base_fee_wei):
+    multiplier = uniform(1.5, 3.0)
+    return int(base_fee_wei * multiplier)
+```
+
+Use:
+```python
+base_fee = w3.eth.get_block("pending")["baseFeePerGas"]
+coinbase_transfer = calculate_bribe(base_fee)
+```
+
+Then inject `coinbase_transfer` as the `value` of a back-run tx to `block.coinbase`.
+
+---
+
+## 2. 🧾 Use Titan's `refundPercent`
+
+When constructing the JSON-RPC payload for `eth_sendBundle`, include:
+
+```json
+{
+  "refundPercent": 90
+}
+```
+
+Add this at the **top level of the payload**, alongside `txs`, `blockNumber`, etc.
+
+---
+
+## 3. ⏱️ Early Slot Timing
+
+Submit bundles early in the next block slot:
+- Always target `block_number + 1`
+- Add logic to detect how many seconds remain until the next block
+- Submit **within the first ~2 seconds** of the new slot
+
+Example:
+
+```python
+def wait_until_block_open(target_block):
+    while True:
+        current = w3.eth.block_number
+        if current >= target_block:
+            break
+        time.sleep(0.1)
+```
+
+---
+
+## 4. 📤 Titan Submission Only
+
+Send `eth_sendBundle` to:
+
+```
+https://rpc.titanbuilder.xyz
+```
+
+- Do **not** include any Flashbots or alternate builders.
+- Titan does **not require authentication** for basic usage.
+
+---
+
+## 5. 🪵 Logging Enhancements
+
+Improve logs to track inclusion issues:
+
+- On submission, log:
+  - `bundleHash`
+  - `targetBlock`
+  - `bribeAmount`
+- On response, log:
+  - Success vs. failure
+  - If failure, log status like `"Underpriced"`, `"ExcludedFromBlock"`, etc.
+- Add helper functions like:
+  ```python
+  def log_bundle_result(bundle_hash, status, reason=None):
+      ...
+  ```
+
+---
+
+## ✅ Summary:
+
+Implement:
+- Dynamic bribes
+- Titan refund logic
+- Early timing
+- Clean submission to Titan only
+- Status-aware logging
+
+Once bundles begin getting included, we will expand to other builders and add profit tracking.
+
+**Push updates to the relevant files only.**
