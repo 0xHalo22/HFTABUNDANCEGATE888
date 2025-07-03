@@ -1,11 +1,8 @@
 
 import requests
-import json
 from web3 import Web3
 
-# Use Titan Builder (no authentication required)
 TITAN_URL = "https://rpc.titanbuilder.xyz"
-print(f"🔗 Using Titan Builder: {TITAN_URL}")
 
 def send_bundle_to_titan(front_tx_hex, victim_tx_hash, back_tx_hex, target_block):
     try:
